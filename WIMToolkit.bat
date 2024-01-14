@@ -94,8 +94,9 @@ setlocal EnableDelayedExpansion
  dism /cleanup-mountpoints 
 ::############################################################################################################################## 
 ::MenuPrincipale 
- :menuprincipale 
+ :menuprincipale
  cls
+ title WIMToolkit v.0.4
  echo                        Menu
  echo =================================================== 
  echo                   [1] Estrai ISO 
