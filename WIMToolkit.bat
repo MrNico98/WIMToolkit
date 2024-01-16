@@ -35,7 +35,6 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Aggiunte\W11\VisualCRuntime" ( mkdir "%~dp0\Aggiunte\W11\VisualCRuntime" )
  IF NOT EXIST "Aggiunte\W11\Driver" ( mkdir "%~dp0\Aggiunte\W11\Driver" )
  set "driver=Aggiunte\W11\Driver"
- set "ToolKitHelper=Risorse\ToolKitHelper.exe"
  set "aggiunte11=Aggiunte\W11"
  set "aggiunte10=Aggiunte\W10"
  set "wimpersonali=WIMpersonali"
