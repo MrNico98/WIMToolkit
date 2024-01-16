@@ -1814,6 +1814,9 @@ ECHO==========================================================
 echo.
 "%WimlibImagex%" optimize "%DVD%\Sources\%WIMFILE%" --recompress
 echo.
+rmdir /q /s "%DVD%\Dart_w11"
+rmdir /q /s "%DVD%\Dart_w11_DeBug"
+rmdir /q /s "%DVD%\Dart_w11_LP"
 ECHO==========================================================
 echo Fatto
 ECHO==========================================================
