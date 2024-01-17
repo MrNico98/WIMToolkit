@@ -1,6 +1,6 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Output "WIMToolkit necessita di essere lanciato come Amministratore. Riavvio."
-    Start-Process -Verb runas -FilePath powershell.exe -ArgumentList "irm -Uri https://github.com/MrNico98/WIMToolkit/archive/refs/heads/main.zip | iex"
+    Start-Process -Verb runas -FilePath powershell.exe -ArgumentList "irm -Uri https://bit.ly/3HmQaDv | iex"
     break
 }
 
