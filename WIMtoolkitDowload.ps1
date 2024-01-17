@@ -12,17 +12,10 @@ cd "C:\"
 # Download the script from GitHub
 Invoke-WebRequest -Uri "https://github.com/MrNico98/WIMToolkit/archive/refs/heads/main.zip" -OutFile "WIMToolkit-main.zip"
 
-
 Expand-Archive -Path "WIMToolkit-main.zip" -DestinationPath "." -Force
 
-
-Move-Item -Path "WIMToolkit-main\WIMToolkit" -Destination "WIMToolkit" -Force
-
-
-Remove-Item -Path "WIMToolkit-main" -Recurse -Force
-
+Move-Item -Path "WIMToolkit-main" -Destination "WIMToolkit" -Force
 
 Remove-Item -Path "WIMToolkit-main.zip" -Force
-
 
 Start-Process -FilePath ".\WIMToolkit\WIMToolkit.bat"
