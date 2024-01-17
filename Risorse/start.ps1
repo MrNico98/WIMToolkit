@@ -61,10 +61,6 @@ Disable-UserInput
 Start-Sleep -Seconds 30 | Out-Null
 
 # Start exe
-powerShell -ExecutionPolicy Bypass -File "C:\Windows\testfix.ps1" -wait
-
-Start-Process -FilePath "C:\Windows\tweaks.bat" -wait
-
 powerShell -ExecutionPolicy Bypass -File "C:\Windows\main.ps1" -wait
 
 Stop-Computer -Force
