@@ -1633,8 +1633,6 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################
 ::Dart
  :dart
- powershell -command "& { Invoke-WebRequest -Uri 'https://shorturl.at/uxZ28' -OutFile 'C:\WIMToolkit\Risorse\DaRT_W11\DebugTools_w11_21h2.tpk' } -Wait"
- powershell -command "& { Invoke-WebRequest -Uri 'https://shorturl.at/bwM09' -OutFile 'C:\WIMToolkit\Risorse\DaRT_W11\DebugTools_w11_22h2.tpk' } -Wait"  
  Risorse\7z.exe l .\%DVD%\setup.exe >.\%DVD%\version.txt 2>&1
  for /f "tokens=4 delims=. " %%i in ('findstr /i /b FileVersion .\%DVD%\version.txt') do set vermajor=%%i
  for /f "tokens=4,5 delims=. " %%i in ('findstr /i /b FileVersion .\%DVD%\version.txt') do (set majorbuildnr=%%i&set deltabuildnr=%%j)
