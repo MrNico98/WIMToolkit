@@ -389,7 +389,8 @@ SETLOCAL ENABLEEXTENSIONS
   goto :selezionacomponenti 
  ) else ( 
   goto :system 
- ) 
+ )
+
  :appsistema 
  cls 
  title WIMToolkit Menu APP Sistema 
@@ -513,7 +514,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::Estrazione iso
  :estraiso
- set ISOFileName= 
+  set ISOFileName= 
  if exist "%DVD%\sources\*.wim" ( 
   echo.La cartella C:\DVD non e' vuota... 
 	echo. 
@@ -544,11 +545,33 @@ SETLOCAL ENABLEEXTENSIONS
  echo.Sto estraendo l'iso in ^<DVD^> attendi... 
  echo. 
  "%Zip%" x -y "%ISO%\%ISOFileName%" -o"%DVD%" >NUL 
- echo. 
- set /a n=0 
+ echo.
+ set "cartella_principale=%DVD%"
+ set "nome_cartella=x86"
+
+ cd /d "%cartella_principale%" || exit /b
+
+ set "cartella_trovata="
+ for /d %%i in ("%nome_cartella%") do (
+    set "cartella_trovata=%%i"
+    echo Cartella x86 trovata
+ )
+
+ if defined cartella_trovata (
+ set /a n=0
+ if exist "%DVD%\x86\sources\boot.wim" set /a n+=1 
+ if exist "%DVD%\x86\sources\install.wim" set /a n+=1 
+ if exist "%DVD%\x86\sources\install.esd" set /a n+=1
+ goto :finestrazione
+ ) else (
+   goto :estrazioneclassica
+ )
+ :estrazioneclassica
+ set /a n=0
  if exist "%DVD%\sources\boot.wim" set /a n+=1 
  if exist "%DVD%\sources\install.wim" set /a n+=1 
- if exist "%DVD%\sources\install.esd" set /a n+=1 
+ if exist "%DVD%\sources\install.esd" set /a n+=1
+ :finestrazione
  if "%n%" equ "2" (echo.Estrazione completata...) else echo.Estrazione fallita.... 
  echo. 
  echo.------------------------------------------------------------------------------- 
