@@ -26,7 +26,7 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Aggiunte" ( mkdir "%~dp0\Aggiunte" ) 
  IF NOT EXIST "Mount" ( mkdir "%~dp0\Mount" ) 
  IF NOT EXIST "Boot" ( mkdir "%~dp0\Boot" ) 
- IF NOT EXIST "WinRE" ( mkdir "%~dp0\WinRe" ) 
+ IF NOT EXIST "winpe" ( mkdir "%~dp0\winpe" ) 
  IF NOT EXIST "Features" ( mkdir "%~dp0\Features" ) 
  IF NOT EXIST "WIMpersonali" ( mkdir "%~dp0\WIMpersonali" )
  IF NOT EXIST "Aggiunte\W11" ( mkdir "%~dp0\Aggiunte\W11" )
@@ -34,12 +34,14 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Aggiunte\W10\VisualCRuntime" ( mkdir "%~dp0\Aggiunte\W10\VisualCRuntime" )
  IF NOT EXIST "Aggiunte\W11\VisualCRuntime" ( mkdir "%~dp0\Aggiunte\W11\VisualCRuntime" )
  IF NOT EXIST "Aggiunte\W11\Driver" ( mkdir "%~dp0\Aggiunte\W11\Driver" )
- set "driver=Aggiunte\W11\Driver"
+ IF NOT EXIST "Aggiunte\W10\Driver" ( mkdir "%~dp0\Aggiunte\W10\Driver" )
+ set "driver11=Aggiunte\W11\Driver"
+ set "driver10=Aggiunte\W10\Driver"
  set "aggiunte11=Aggiunte\W11"
  set "aggiunte10=Aggiunte\W10"
  set "wimpersonali=WIMpersonali"
  set "features=Features" 
- set "winre=WinRE" 
+ set "winpe=winpe" 
  set "mount=Mount" 
  set "DVD=DVD" 
  set "ISO=ISO" 
@@ -47,7 +49,7 @@ SETLOCAL ENABLEEXTENSIONS
  set "Aggiunte=Aggiunte" 
  set "Oscdimg=Risorse\oscdimg.exe" 
  set "WimlibImagex=Risorse\wimlib-imagex.exe"
- set "os=" 
+ set "os=0" 
  set "OutputFolder=%DVD%" 
  chcp 1252 > nul 2>&1 
  set LANG=it_IT 
@@ -90,7 +92,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo =========================================== 
  dism /quiet /unmount-image /mountdir:%mount% /discard >nul
  dism /quiet /unmount-image /mountdir:%boot% /discard >nul
- dism /quiet /unmount-image /mountdir:%winre% /discard >nul
+ dism /quiet /unmount-image /mountdir:%winpe% /discard >nul
  dism /cleanup-mountpoints 
 ::############################################################################################################################## 
 ::MenuPrincipale 
@@ -126,7 +128,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::RimuoviComponenti 
  :rimuovicomponenti 
  title WIMToolkit Menu Componenti 
- IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
+ IF "%os%" equ "0" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
  cls 
  echo                    Menu Componenti 
  echo =================================================== 
@@ -141,7 +143,7 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 1 goto :selezionacomponenti 
 ::############################################################################################################################## 
 ::SelezionaCompoenti 
- :selezionacomponenti 
+ :SelezionaComponenti
  cls 
  echo                    Menu Componenti 
  echo =============================================== 
@@ -621,16 +623,16 @@ SETLOCAL ENABLEEXTENSIONS
  dism /mount-image /imagefile:"%DVD%\sources\boot.wim" /index:2 /mountdir:%boot% 
  set "bootmontato=si"
  ) else ( set "bootmontato=no" )
- choice /C:SN /N /M "Vuoi montare WinRE.wim? ['S'i/'N'o]: " 
+ choice /C:SN /N /M "Vuoi montare winpe.wim? ['S'i/'N'o]: " 
  if errorlevel 2 ( 
     set "rewin=no" 
  ) else ( 
     set "rewin=si" 
  ) 
  if "%rewin%" equ "si" ( 
- dism /mount-image /imagefile:"%DVD%\sources\boot.wim" /index:1 /mountdir:%winre% 
- set "winremontato=si"
- ) else ( set "winremontato=no" )
+ dism /mount-image /imagefile:"%DVD%\sources\boot.wim" /index:1 /mountdir:%winpe% 
+ set "winpemontato=si"
+ ) else ( set "winpemontato=no" )
  set "deltrim=%indicemontato%"
  dism /Get-WimInfo /WimFile:"%DVD%\sources\install.wim" | find "Windows 11" 
  IF "%ERRORLEVEL%"=="0" ( set "os=11" ) else ( set "os=10" ) 
@@ -638,7 +640,17 @@ SETLOCAL ENABLEEXTENSIONS
  goto :menuprincipale 
 ::############################################################################################################################## 
 ::Rimozione Componenti 
- :rimozioneselzionati 
+ :rimozioneselzionati
+ title Rimozioni Componenti WinCustomizer
+
+ IF "%os%" equ "11" ( goto :rimuvoi11 ) 
+ IF "%os%" equ "10" ( goto :rimuvoi10 ) else ( echo OS non riconosciuto && timeout 4 >NUL && goto :rimuovicomponenti )
+
+ :rimuvoi10
+
+
+
+ :rimuvoi11 
  cls 
  echo Inizio Rimozione..... 
  If "%internetexplorer%" equ "-" ( 
@@ -1204,7 +1216,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::Unattend 
  :unattend 
  Title WIMToolkit Autounattend 
- IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale )
+ IF "%os%" equ "0" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale )
  IF "%os%" equ "11" ( call :unattend11 ) else ( call :unattend10 )
 
 :unattend10
@@ -1272,7 +1284,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::Smonta WIM
  :smontawim 
  title WIMToolkit Smonta Wim 
- IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
+ IF "%os%" equ "0" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
  cls 
  echo                   Menu Smonta Wim 
  echo =================================================== 
@@ -1291,8 +1303,8 @@ SETLOCAL ENABLEEXTENSIONS
  dism /unmount-image /mountdir:"%boot%" /discard
  ) 
  dism /unmount-image /mountdir:"%mount%" /discard 
- if "%winremontato%" equ "si" (
- dism /unmount-image /mountdir:"%winre%" /discard
+ if "%winpemontato%" equ "si" (
+ dism /unmount-image /mountdir:"%winpe%" /discard
  )
  set "os=" 
  goto :smontawim 
@@ -1345,30 +1357,30 @@ SETLOCAL ENABLEEXTENSIONS
 			if exist "%boot%\Windows\WinSxS\Temp\TransformerRollbackData\*" Risorse\PowerRun.exe cmd.exe /c "del /s /f /q %boot%\Windows\WinSxS\Temp\TransformerRollbackData\*" 
 		)
 
-	if "%winremontato%" equ "si" (
-		if exist "%winre%\Users\Default\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Users\Default\*.LOG1" 
-		if exist "%winre%\Users\Default\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Users\Default\*.LOG2" 
-		if exist "%winre%\Users\Default\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Users\Default\*.TM.blf" 
-		if exist "%winre%\Users\Default\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Users\Default\*.regtrans-ms" 
-		if exist "%winre%\Windows\inf\*.log" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\inf\*.log" 
+	if "%winpemontato%" equ "si" (
+		if exist "%winpe%\Users\Default\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Users\Default\*.LOG1" 
+		if exist "%winpe%\Users\Default\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Users\Default\*.LOG2" 
+		if exist "%winpe%\Users\Default\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Users\Default\*.TM.blf" 
+		if exist "%winpe%\Users\Default\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Users\Default\*.regtrans-ms" 
+		if exist "%winpe%\Windows\inf\*.log" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\inf\*.log" 
 
-		if exist "%winre%\Windows\CbsTemp\*" (
-			for /f %%j in ('"dir /s /b /ad "%winre%\Windows\CbsTemp\*"" 2^>nul') do (call :RemoveFolder %%j)
-			Risorse\PowerRun.exe cmd.exe /c "del /s /f /q %winre%\Windows\CbsTemp\*" 
+		if exist "%winpe%\Windows\CbsTemp\*" (
+			for /f %%j in ('"dir /s /b /ad "%winpe%\Windows\CbsTemp\*"" 2^>nul') do (call :RemoveFolder %%j)
+			Risorse\PowerRun.exe cmd.exe /c "del /s /f /q %winpe%\Windows\CbsTemp\*" 
 		)
 
-		if exist "%winre%\Windows\System32\config\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\config\*.LOG1" 
-		if exist "%winre%\Windows\System32\config\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\config\*.LOG2" 
-		if exist "%winre%\Windows\System32\config\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\config\*.TM.blf" 
-		if exist "%winre%\Windows\System32\config\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\config\*.regtrans-ms" 
-		if exist "%winre%\Windows\System32\SMI\Store\Machine\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\SMI\Store\Machine\*.LOG1" 
-		if exist "%winre%\Windows\System32\SMI\Store\Machine\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\SMI\Store\Machine\*.LOG2" 
-		if exist "%winre%\Windows\System32\SMI\Store\Machine\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\SMI\Store\Machine\*.TM.blf" 
-		if exist "%winre%\Windows\System32\SMI\Store\Machine\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\System32\SMI\Store\Machine\*.regtrans-ms" 
-		if exist "%winre%\Windows\WinSxS\Backup\*" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\WinSxS\Backup\*" 
-		if exist "%winre%\Windows\WinSxS\ManifestCache\*.bin" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\WinSxS\ManifestCache\*.bin" 
-		if exist "%winre%\Windows\WinSxS\Temp\PendingDeletes\*" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\WinSxS\Temp\PendingDeletes\*" 
-		if exist "%winre%\Windows\WinSxS\Temp\TransformerRollbackData\*" del /s /f /q "%winre%\Windows\WinSxS\Temp\TransformerRollbackData\*" 
+		if exist "%winpe%\Windows\System32\config\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\config\*.LOG1" 
+		if exist "%winpe%\Windows\System32\config\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\config\*.LOG2" 
+		if exist "%winpe%\Windows\System32\config\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\config\*.TM.blf" 
+		if exist "%winpe%\Windows\System32\config\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\config\*.regtrans-ms" 
+		if exist "%winpe%\Windows\System32\SMI\Store\Machine\*.LOG1" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\SMI\Store\Machine\*.LOG1" 
+		if exist "%winpe%\Windows\System32\SMI\Store\Machine\*.LOG2" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\SMI\Store\Machine\*.LOG2" 
+		if exist "%winpe%\Windows\System32\SMI\Store\Machine\*.TM.blf" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\SMI\Store\Machine\*.TM.blf" 
+		if exist "%winpe%\Windows\System32\SMI\Store\Machine\*.regtrans-ms" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\System32\SMI\Store\Machine\*.regtrans-ms" 
+		if exist "%winpe%\Windows\WinSxS\Backup\*" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\WinSxS\Backup\*" 
+		if exist "%winpe%\Windows\WinSxS\ManifestCache\*.bin" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\WinSxS\ManifestCache\*.bin" 
+		if exist "%winpe%\Windows\WinSxS\Temp\PendingDeletes\*" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winpe%\Windows\WinSxS\Temp\PendingDeletes\*" 
+		if exist "%winpe%\Windows\WinSxS\Temp\TransformerRollbackData\*" del /s /f /q "%winpe%\Windows\WinSxS\Temp\TransformerRollbackData\*" 
 	)
 
 			if exist "%mount%\$Recycle.Bin" call :RemoveFolder "%mount%\$Recycle.Bin"
@@ -1399,8 +1411,8 @@ SETLOCAL ENABLEEXTENSIONS
  dism /unmount-image /mountdir:"%boot%" /commit
  ) 
  dism /unmount-image /mountdir:"%mount%" /commit
- if "%winremontato%" equ "si" ( 
- dism /unmount-image /mountdir:"%winre%" /commit 
+ if "%winpemontato%" equ "si" ( 
+ dism /unmount-image /mountdir:"%winpe%" /commit 
  )
  if "%trim%" equ "si" ( 
  dism /Export-Image /SourceImageFile:"%DVD%\sources\install.wim" /SourceIndex:%deltrim% /DestinationImageFile:"%DVD%\sources\install_edit.wim" 
@@ -1422,7 +1434,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::Tweaks 
  :tweaks 
- IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
+ IF "%os%" equ "0" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
  IF "%os%" equ "11" ( call :tweaks11 ) else ( call :tweaks10 ) 
  :tweaks10 
  echo in arrivo con i prossimi aggiornamenti && timeout 4 >NUL && goto :menuprincipale 
@@ -1468,7 +1480,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo     [3] Personalizza nomi indici dell'install.wim
  echo     [4] Ottimizza WIM
  echo     [5] Converti WIM in ESD
- echo     [6] Elimina WinRe
+ echo     [6] Elimina winpe
  echo     [7] DaRT
  echo. 
  echo               [X] Indietro                    
@@ -1476,14 +1488,14 @@ SETLOCAL ENABLEEXTENSIONS
  choice /C:1234567X /N /M "Digita un numero: " 
  if errorlevel 8 goto :menuprincipale
  if errorlevel 7 call :dart
- if errorlevel 6 call :delwinre
+ if errorlevel 6 call :delwinpe
  if errorlevel 5 call :convertwim
  if errorlevel 4 call :ottimizzawim
  if errorlevel 3 call :nomeindicipers
  if errorlevel 2 call :DeleteImage 
  if errorlevel 1 call :convertesd
 
- :delwinre
+ :delwinpe
 
  
 
@@ -1611,14 +1623,13 @@ SETLOCAL ENABLEEXTENSIONS
  :aggiungicomeponenti
  cls
  Title WIMToolkit Aggiungi Componenti 
- IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
- echo                 Aggiungi Componenti
+ IF "%os%" equ "0" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
+ echo              Aggiungi Componenti
  echo =================================================== 
  echo           [1] Visual C++
  echo           [2] Aggiungi Driver
- echo           
- echo.
- echo                   [X] Indietro
+ echo.           
+ echo              [X] Indietro
  echo ===================================================
  choice /C:12X /N /M "Digita un numero: " 
  if errorlevel 3 goto :menuprincipale 
@@ -1626,7 +1637,17 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 1 goto :visualc
 
  :adddriver
- dism /Image:%mount% /Add-Driver /Driver:%driver% /ForceUnsigned /recurse
+ IF "%os%" equ "11" ( 
+ dism /Image:%mount% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
+ dism /Image:%winpe% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
+ )
+
+ IF "%os%" equ "10" (
+ dism /Image:%mount% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
+ dism /Image:%winpe% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
+ )
+
+ goto :aggiungicomeponenti
 
  :visualc
 
@@ -1686,7 +1707,7 @@ SETLOCAL ENABLEEXTENSIONS
  exit /b
  )
 
- :AskDartWinreWIM
+ :AskDartwinpeWIM
  SET "DARTWRE=DARTWRE1"
 
  :next2
@@ -1768,43 +1789,43 @@ SETLOCAL ENABLEEXTENSIONS
  %WimlibImagex% optimize "%DVD%\Sources\boot.wim" --recompress
 
  :resume3
- IF /I "%DARTWRE%"=="DARTWRE1" GOTO :WinreWIM_DaRT
+ IF /I "%DARTWRE%"=="DARTWRE1" GOTO :winpeWIM_DaRT
  IF /I "%DARTWRE%"=="DARTWRE0" GOTO :resume5
 
- :WinreWIM_DaRT
+ :winpeWIM_DaRT
  echo.
  ECHO==========================================================
- echo Aggiungo DaRT %ISOver% %warch% in %warch% Winre.wim...
+ echo Aggiungo DaRT %ISOver% %warch% in %warch% winpe.wim...
  ECHO==========================================================
  echo.
- %WimlibImagex% extract "%DVD%\sources\%WIMFILE%" 1 Windows\System32\Recovery\winre.wim --no-acls --dest-dir=%DVD%\Winre
+ %WimlibImagex% extract "%DVD%\sources\%WIMFILE%" 1 Windows\System32\Recovery\winpe.wim --no-acls --dest-dir=%DVD%\winpe
 
- %WimlibImagex% update "%DVD%\Winre\winre.wim" 1 --command="add '%DVD%\Dart_w%Winver%\%darch%\' '\'"
+ %WimlibImagex% update "%DVD%\winpe\winpe.wim" 1 --command="add '%DVD%\Dart_w%Winver%\%darch%\' '\'"
 
- %WimlibImagex% update "%DVD%\Winre\winre.wim" 1 --command="add '%DVD%\Dart_w%Winver%_LP\%darch%\' '\'"
+ %WimlibImagex% update "%DVD%\winpe\winpe.wim" 1 --command="add '%DVD%\Dart_w%Winver%_LP\%darch%\' '\'"
 
  IF /I "%Winver%"=="7" GOTO :resume4
  IF /I "%Winver%"=="81" GOTO :resume4
 
- %WimlibImagex% update "%DVD%\Winre\winre.wim" 1 --command="add '%DVD%\Dart_w%Winver%_DeBug\%darch%\' '\'"
+ %WimlibImagex% update "%DVD%\winpe\winpe.wim" 1 --command="add '%DVD%\Dart_w%Winver%_DeBug\%darch%\' '\'"
 
  :resume4
  echo.
  ECHO==========================================================
- echo Ottimizzo %warch% WinRe...
+ echo Ottimizzo %warch% winpe...
  ECHO==========================================================
  echo.
- "%WimlibImagex%" optimize "%DVD%\Winre\Winre.wim" --recompress
+ "%WimlibImagex%" optimize "%DVD%\winpe\winpe.wim" --recompress
 
  echo.
  ECHO==========================================================
- echo Aggiungo %warch% Winre.wim In %warch% %WIMFILE%...
+ echo Aggiungo %warch% winpe.wim In %warch% %WIMFILE%...
  ECHO==========================================================
  echo.
 
 for /f "tokens=3 delims=: " %%i in ('%WimlibImagex% info "%DVD%\sources\%WIMFILE%" ^| findstr /c:"Image Count"') do set images=%%i
 for /L %%i in (1,1,%images%) do (
-  %WimlibImagex% update "%DVD%\sources\%WIMFILE%" %%i --command="add '%DVD%\Winre\Winre.wim' '\Windows\System32\Recovery\winre.wim'" >nul
+  %WimlibImagex% update "%DVD%\sources\%WIMFILE%" %%i --command="add '%DVD%\winpe\winpe.wim' '\Windows\System32\Recovery\winpe.wim'" >nul
 )
 echo.
 ECHO==========================================================
@@ -2469,7 +2490,7 @@ goto :extra
  echo Pulizia WIMtoolkit, attendi.... 
  dism /quiet /unmount-image /mountdir:%mount% /discard >nul
  dism /quiet /unmount-image /mountdir:%boot% /discard >nul
- dism /quiet /unmount-image /mountdir:%winre% /discard >nul
+ dism /quiet /unmount-image /mountdir:%winpe% /discard >nul
  call :RemoveFile %mount% 
  exit 
 ::############################################################################################################################## 
