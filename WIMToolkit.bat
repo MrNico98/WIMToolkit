@@ -1640,13 +1640,14 @@ SETLOCAL ENABLEEXTENSIONS
  IF "%os%" equ "11" ( 
  dism /Image:%mount% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
  dism /Image:%winpe% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
+ dism /Image:%boot% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
  )
 
  IF "%os%" equ "10" (
  dism /Image:%mount% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
  dism /Image:%winpe% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
+ dism /Image:%boot% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
  )
-
  goto :aggiungicomeponenti
 
  :visualc
