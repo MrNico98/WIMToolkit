@@ -1498,8 +1498,8 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 1 call :convertesd
 
  :delwinpe
-
- 
+ dism /Delete-Image /ImageFile:%DVD%\sources\boot.wim /Index:1
+ goto :extra
 
 ::############################################################################################################################## 
 ::Crea ISO 
