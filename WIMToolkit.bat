@@ -568,6 +568,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo                     %microsoftteam% [34] Microsoft Team
  echo                     %onenote% [35] OneNote
  echo                     %wallet% [36] Microsoft Wallet
+ echo                     %outlook% [37] Outlook
  echo.          
  echo                           [A] Seleziona tutto 
  echo                           [X] Indietro 
@@ -609,6 +610,7 @@ SETLOCAL ENABLEEXTENSIONS
  if "%Sceltanumero%" equ "34" ( if "%microsoftteam%" equ "-" ( set "microsoftteam=" ) else ( set "microsoftteam=-" ) )
  if "%Sceltanumero%" equ "35" ( if "%onenote%" equ "-" ( set "onenote=" ) else ( set "onenote=-" ) )
  if "%Sceltanumero%" equ "36" ( if "%wallet%" equ "-" ( set "wallet=" ) else ( set "wallet=-" ) )
+ if "%Sceltanumero%" equ "36" ( if "%outlook%" equ "-" ( set "outlook=" ) else ( set "outlook=-" ) )
 
  if /i "%Sceltanumero%" equ "A" ( 
     set "wordpad=-" 
@@ -647,6 +649,7 @@ SETLOCAL ENABLEEXTENSIONS
     set "microsoftteam=-"
     set "onenote=-"
     set "wallet=-"
+    set "outlook=-"
 
  ) 
  if /i "%Sceltanumero%" equ "X" (  
@@ -1327,6 +1330,14 @@ SETLOCAL ENABLEEXTENSIONS
  )
    If "%wallet%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.Wallet"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+    If "%outlook%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.OutlookForWindows"') do ( 
     set "PackageName=%%a" 
  ) 
  if defined PackageName ( 
@@ -2325,7 +2336,8 @@ goto :extra
  goto :puliziaimmagine
 ::############################################################################################################################## 
 ::Lista suggerita
- :suggeritilista 
+ :suggeritilista
+ if "%os%" equ "11" (
     set "internetexplorer=-" 
     set "windowsservice=-" 
     set "windowsmail=-" 
@@ -2396,7 +2408,87 @@ goto :extra
     set "zunemusic=-" 
     set "zunevideo=-" 
     set "quickassist=-" 
-    set "webexperience=-" 
+    set "webexperience=-"
+    set "mixedrealty=-"
+    set "onenote=-"
+    set "wallet=-"
+ ) else (
+    set "internetexplorer=-" 
+    set "windowsservice=-" 
+    set "windowsmail=-" 
+    set "openssh=-" 
+    set "firstlogonoanimation=-" 
+    set "internetexplorer=-" 
+    set "gameexplorer=-" 
+    set "lockscreen=-" 
+    set "screensaver=-" 
+    set "suonitemi=-" 
+    set "riconoscimentovocale=-" 
+    set "wallpaper=-" 
+    set "windowsmediaplayer=-" 
+    set "windowsphotoviewer=-" 
+    set "temiwindowspersonalizzati=-" 
+    set "windowstifffilter=-" 
+    set "winsat=-"
+    set "microsoftteam=-"
+    set "assignedaccess=-" 
+    set "ceip=-" 
+    set "windowshelloface=-" 
+    set "kerneldegging=-" 
+    set "wifisense=-" 
+    set "unifiedtelemetryclient=-" 
+    set "picturepassword=-" 
+    set "homegroup=-" 
+    set "language=-" 
+    set "hello=-" 
+    set "kernella57=-" 
+    set "mediaplayer=-" 
+    set "stepsrecord=-" 
+    set "tabletpc=-" 
+    set "hevecvido=-" 
+    set "automatedesktop=-" 
+    set "rawimageextention=-" 
+    set "vp9video=-" 
+    set "webmediaextation=-" 
+    set "webimage=-" 
+    set "telemetria=-" 
+    set "localizzazione=-" 
+    set "tailoredexperiences=-" 
+    set "wordpad=-" 
+    set "clipchamp=-"
+    set "onedrive=-"
+    set "bingnews=-" 
+    set "bingwheter=-" 
+    set "gamingapp=-" 
+    set "gethelp=-" 
+    set "getstarted=-" 
+    set "officehub=-" 
+    set "microsoftsolitair=-" 
+    set "microsoftpaint=-" 
+    set "microsoftstickynotes=-" 
+    set "microsoftpeople=-" 
+    set "microsoftstore=-" 
+    set "todo=-" 
+    set "windowsphoto=-" 
+    set "windowsallarms=-" 
+    set "windowscalculator=-" 
+    set "windowscamera=-" 
+    set "windowscomunication=-" 
+    set "feedbackhub=-" 
+    set "windowsmap=-" 
+    set "suondrecord=-" 
+    set "windowsstore=-" 
+    set "xbox=-" 
+    set "yourphone=-" 
+    set "zunemusic=-" 
+    set "zunevideo=-" 
+    set "quickassist=-" 
+    set "webexperience=-"
+    set "mixedrealty=-"
+    set "onenote=-"
+    set "dviewe=-"
+    set "wallet=-"
+ )
  goto :selezionacomponenti 
 ::##############################################################################################################################
 ::Disabilita Windows Feature
