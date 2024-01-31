@@ -387,8 +387,7 @@ SETLOCAL ENABLEEXTENSIONS
   goto :selezionacomponenti 
  ) else ( 
   goto :system 
- )
-
+ ) 
  :appsistema 
  cls 
  title WIMToolkit Menu APP Sistema 
@@ -512,7 +511,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::Estrazione iso
  :estraiso
-  set ISOFileName= 
+ set ISOFileName= 
  if exist "%DVD%\sources\*.wim" ( 
   echo.La cartella C:\DVD non e' vuota... 
 	echo. 
@@ -543,12 +542,11 @@ SETLOCAL ENABLEEXTENSIONS
  echo.Sto estraendo l'iso in ^<DVD^> attendi... 
  echo. 
  "%Zip%" x -y "%ISO%\%ISOFileName%" -o"%DVD%" >NUL 
- echo.
- set /a n=0
+ echo. 
+ set /a n=0 
  if exist "%DVD%\sources\boot.wim" set /a n+=1 
  if exist "%DVD%\sources\install.wim" set /a n+=1 
- if exist "%DVD%\sources\install.esd" set /a n+=1
- :finestrazione
+ if exist "%DVD%\sources\install.esd" set /a n+=1 
  if "%n%" equ "2" (echo.Estrazione completata...) else echo.Estrazione fallita.... 
  echo. 
  echo.------------------------------------------------------------------------------- 
@@ -1485,15 +1483,9 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 2 call :DeleteImage 
  if errorlevel 1 call :convertesd
 
-<<<<<<< HEAD
- :delwinpe
- dism /Delete-Image /ImageFile:%DVD%\sources\boot.wim /Index:1
- goto :extra
-=======
  :delwinre
 
  
->>>>>>> parent of 8975377 (up)
 
 ::############################################################################################################################## 
 ::Crea ISO 
@@ -1634,30 +1626,13 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 1 goto :visualc
 
  :adddriver
-<<<<<<< HEAD
- IF "%os%" equ "11" ( 
- dism /Image:%mount% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
- dism /Image:%winpe% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
- dism /Image:%boot% /Add-Driver /Driver:%driver11% /ForceUnsigned /recurse
- )
-
- IF "%os%" equ "10" (
- dism /Image:%mount% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
- dism /Image:%winpe% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
- dism /Image:%boot% /Add-Driver /Driver:%driver10% /ForceUnsigned /recurse
- )
- goto :aggiungicomeponenti
-=======
  dism /Image:%mount% /Add-Driver /Driver:%driver% /ForceUnsigned /recurse
->>>>>>> parent of 8975377 (up)
 
  :visualc
 
 ::############################################################################################################################
 ::Dart
  :dart
- powershell -command "& { Invoke-WebRequest -Uri 'https://shorturl.at/uxZ28' -OutFile 'C:\WIMToolkit\Risorse\DaRT_W11\DebugTools_w11_21h2.tpk' } -Wait"
- powershell -command "& { Invoke-WebRequest -Uri 'https://shorturl.at/bwM09' -OutFile 'C:\WIMToolkit\Risorse\DaRT_W11\DebugTools_w11_22h2.tpk' } -Wait"  
  Risorse\7z.exe l .\%DVD%\setup.exe >.\%DVD%\version.txt 2>&1
  for /f "tokens=4 delims=. " %%i in ('findstr /i /b FileVersion .\%DVD%\version.txt') do set vermajor=%%i
  for /f "tokens=4,5 delims=. " %%i in ('findstr /i /b FileVersion .\%DVD%\version.txt') do (set majorbuildnr=%%i&set deltabuildnr=%%j)
