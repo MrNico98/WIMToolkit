@@ -128,12 +128,12 @@ SETLOCAL ENABLEEXTENSIONS
  title WIMToolkit Menu Componenti 
  IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
  cls 
- echo                    Menu Componenti 
+ echo               Menu Componenti 
  echo =================================================== 
- echo              [1] Seleziona i componenti 
- echo              [2] Avvia rimozione selezionati "-" 
+ echo        [1] Seleziona i componenti 
+ echo        [2] Avvia rimozione selezionati "-" 
  echo. 
- echo              [X] Indietro 
+ echo                [X] Indietro 
  echo =================================================== 
  choice /C:12X /N /M "Digita un numero: " 
  if errorlevel 3 goto :menuprincipale 
