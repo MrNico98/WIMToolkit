@@ -546,27 +546,6 @@ SETLOCAL ENABLEEXTENSIONS
  echo. 
  "%Zip%" x -y "%ISO%\%ISOFileName%" -o"%DVD%" >NUL 
  echo.
- set "cartella_principale=%DVD%"
- set "nome_cartella=x86"
-
- cd /d "%cartella_principale%" || exit /b
-
- set "cartella_trovata="
- for /d %%i in ("%nome_cartella%") do (
-    set "cartella_trovata=%%i"
-    echo Cartella x86 trovata
- )
-
- if defined cartella_trovata (
- set /a n=0
- if exist "%DVD%\x86\sources\boot.wim" set /a n+=1 
- if exist "%DVD%\x86\sources\install.wim" set /a n+=1 
- if exist "%DVD%\x86\sources\install.esd" set /a n+=1
- goto :finestrazione
- ) else (
-   goto :estrazioneclassica
- )
- :estrazioneclassica
  set /a n=0
  if exist "%DVD%\sources\boot.wim" set /a n+=1 
  if exist "%DVD%\sources\install.wim" set /a n+=1 
