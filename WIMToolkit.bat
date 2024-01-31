@@ -66,7 +66,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::EULA 
  cls 
- title WIMToolkit v.0.4
+ title WIMToolkit v.0.5
  echo. ======================================================EULA============================================================ 
  echo. Il WIMToolkit e' fondamentalmente uno strumento per eseguire la manutenzione, personalizzare, aggiungere o rimuovere 
  echo. funzionalita' e componenti, abilitare o disabilitare funzionalita' del sistema operativo Windows. 
@@ -96,7 +96,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::MenuPrincipale 
  :menuprincipale
  cls
- title WIMToolkit v.0.4
+ title WIMToolkit v.0.5
  echo                        Menu
  echo =================================================== 
  echo                   [1] Estrai ISO 
@@ -141,7 +141,7 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 1 goto :selezionacomponenti 
 ::############################################################################################################################## 
 ::SelezionaCompoenti 
- :selezionacomponenti 
+ :selezionacomponenti
  cls 
  echo                    Menu Componenti 
  echo =============================================== 
@@ -388,7 +388,11 @@ SETLOCAL ENABLEEXTENSIONS
  ) else ( 
   goto :system 
  ) 
- :appsistema 
+ :appsistema
+ if "%os%" equ "10" ( goto :appsistema10 )
+ if "%os%" equ "11" ( goto :appsistema11 ) else ( echo OS non settato && timeout 4 >NUL && goto :menuprincipale )
+
+ :appsistema10
  cls 
  title WIMToolkit Menu APP Sistema 
  echo                            MENU APP Sistema 
@@ -407,26 +411,30 @@ SETLOCAL ENABLEEXTENSIONS
  echo                     %microsoftpaint% [12] Paint 
  echo                     %microsoftpeople% [13] Microsoft People 
  echo                     %catturaschermo% [14] Cattura Schermo 
- echo                     %microsoftstore% [15] Microsoft Store Acquisti in app 
+ echo                     %microsoftstore% [15] Microsoft Store Acquisti in app -
  echo                     %todo% [16] Microsoft To Do 
  echo                     %vclibs% [17] VC Libs (causa problemi) 
- echo                     %windowsphoto% [18] Windows Photo 
- echo                     %windowsallarms% [19] Sveglie e Allarmi 
- echo                     %windowscalculator% [20] Calcolatrice 
- echo                     %windowscamera% [21] Windows Camera 
- echo                     %windowscomunication% [22] Windows Comunication 
+ echo                     %windowsphoto% [18] Windows Photo -
+ echo                     %windowsallarms% [19] Sveglie e Allarmi -
+ echo                     %windowscalculator% [20] Calcolatrice -
+ echo                     %windowscamera% [21] Windows Camera -
+ echo                     %windowscomunication% [22] Windows Comunication -
  echo                     %feedbackhub% [23] Feedback HUB 
- echo                     %windowsmap% [24] Mappe 
+ echo                     %windowsmap% [24] Mappe -
  echo                     %windowsnotepad% [25] Blocco Note 
- echo                     %suondrecord% [26] Registratore 
+ echo                     %suondrecord% [26] Registratore -
  echo                     %windowsstore% [27] Microsoft Store 
- echo                     %xbox% [28] Xbox 
- echo                     %yourphone% [29] Connetti il tuo telefono 
- echo                     %zunemusic% [30] Zune Music 
- echo                     %zunevideo% [31] Zune video 
+ echo                     %xbox% [28] Xbox -
+ echo                     %yourphone% [29] Connetti il tuo telefono  -
+ echo                     %zunemusic% [30] Zune Music -
+ echo                     %zunevideo% [31] Zune video -
  echo                     %quickassist% [32] Quick QuickAssist 
- echo                     %webexperience% [33] Web Experience
+ echo                     %webexperience% [33] Web Experience -
  echo                     %microsoftteam% [34] Microsoft Team
+ echo                     %mixedrealty% [35] Microsoft MixedReality Portal
+ echo                     %onenote% [36] OneNote
+ echo                     %dviewe% [37] Microsoft3DViewer
+ echo                     %wallet% [38] Microsoft Wallet
  echo.          
  echo                           [A] Seleziona tutto 
  echo                           [X] Indietro 
@@ -466,6 +474,10 @@ SETLOCAL ENABLEEXTENSIONS
  if "%Sceltanumero%" equ "32" ( if "%quickassist%" equ "-" ( set "quickassist=" ) else ( set "quickassist=-" ) )  
  if "%Sceltanumero%" equ "33" ( if "%webexperience%" equ "-" ( set "webexperience=" ) else ( set "webexperience=-" ) )
  if "%Sceltanumero%" equ "34" ( if "%microsoftteam%" equ "-" ( set "microsoftteam=" ) else ( set "microsoftteam=-" ) ) 
+ if "%Sceltanumero%" equ "35" ( if "%mixedrealty%" equ "-" ( set "mixedrealty=" ) else ( set "mixedrealty=-" ) )
+ if "%Sceltanumero%" equ "36" ( if "%onenote%" equ "-" ( set "onenote=" ) else ( set "onenote=-" ) )
+ if "%Sceltanumero%" equ "37" ( if "%dviewe%" equ "-" ( set "dviewe=" ) else ( set "dviewe=-" ) )
+ if "%Sceltanumero%" equ "38" ( if "%wallet%" equ "-" ( set "wallet=" ) else ( set "wallet=-" ) )
 
  if /i "%Sceltanumero%" equ "A" ( 
     set "wordpad=-" 
@@ -502,11 +514,145 @@ SETLOCAL ENABLEEXTENSIONS
     set "quickassist=-" 
     set "webexperience=-"
     set "microsoftteam=-"
+    set "mixedrealty=-"
+    set "onenote=-"
+    set "dviewe=-"
+    set "wallet=-"
+
  ) 
  if /i "%Sceltanumero%" equ "X" (  
   goto :selezionacomponenti 
  ) else ( 
-  goto :appsistema 
+  goto :appsistema10
+ ) 
+
+
+ :appsistema11
+ cls 
+ title WIMToolkit Menu APP Sistema 
+ echo                            MENU APP Sistema 
+ echo =============================================================================== 
+ echo                     %wordpad% [1] WordPad 
+ echo                     %clipchamp% [2] Clip Champ 
+ echo                     %bingnews% [3] Bing News 
+ echo                     %bingwheter% [4] Bing Wheter 
+ echo                     %desktopappinstaller% [5] Desktop App Installer 
+ echo                     %gamingapp% [6] Gaming App 
+ echo                     %gethelp% [7] Get Help 
+ echo                     %getstarted% [8] Per Iniziare 
+ echo                     %officehub% [9] Office 
+ echo                     %microsoftsolitair% [10] Solitario 
+ echo                     %microsoftstickynotes% [11] Sticky Notes 
+ echo                     %microsoftpaint% [12] Paint 
+ echo                     %microsoftpeople% [13] Microsoft People 
+ echo                     %catturaschermo% [14] Cattura Schermo 
+ echo                     %microsoftstore% [15] Microsoft Store Acquisti in app 
+ echo                     %todo% [16] Microsoft To Do 
+ echo                     %vclibs% [17] VC Libs (causa problemi) 
+ echo                     %windowsphoto% [18] Windows Photo 
+ echo                     %windowsallarms% [19] Sveglie e Allarmi 
+ echo                     %windowscalculator% [20] Calcolatrice 
+ echo                     %windowscamera% [21] Windows Camera 
+ echo                     %windowscomunication% [22] Windows Comunication 
+ echo                     %feedbackhub% [23] Feedback HUB 
+ echo                     %windowsmap% [24] Mappe 
+ echo                     %windowsnotepad% [25] Blocco Note 
+ echo                     %suondrecord% [26] Registratore 
+ echo                     %windowsstore% [27] Microsoft Store 
+ echo                     %xbox% [28] Xbox 
+ echo                     %yourphone% [29] Connetti il tuo telefono 
+ echo                     %zunemusic% [30] Zune Music 
+ echo                     %zunevideo% [31] Zune video 
+ echo                     %quickassist% [32] Quick QuickAssist 
+ echo                     %webexperience% [33] Web Experience
+ echo                     %microsoftteam% [34] Microsoft Team
+ echo                     %onenote% [35] OneNote
+ echo                     %wallet% [36] Microsoft Wallet
+ echo.          
+ echo                           [A] Seleziona tutto 
+ echo                           [X] Indietro 
+ echo =============================================================================== 
+ set /p "Sceltanumero=Digita un numero, poi premi invio: " 
+ if "%Sceltanumero%" equ "1" ( if "%wordpad%" equ "-" ( set "wordpad=" ) else ( set "wordpad=-" ) ) 
+ if "%Sceltanumero%" equ "2" ( if "%clipchamp%" equ "-" ( set "clipchamp=" ) else ( set "clipchamp=-" ) ) 
+ if "%Sceltanumero%" equ "3" ( if "%bingnews%" equ "-" ( set "bingnews=" ) else ( set "bingnews=-" ) ) 
+ if "%Sceltanumero%" equ "4" ( if "%bingwheter%" equ "-" ( set "bingwheter=" ) else ( set "bingwheter=-" ) ) 
+ if "%Sceltanumero%" equ "5" ( if "%desktopappinstaller%" equ "-" ( set "desktopappinstaller=" ) else ( set "desktopappinstaller=-" ) ) 
+ if "%Sceltanumero%" equ "6" ( if "%gamingapp%" equ "-" ( set "gamingapp=" ) else ( set "gamingapp=-" ) ) 
+ if "%Sceltanumero%" equ "7" ( if "%gethelp%" equ "-" ( set "gethelp=" ) else ( set "gethelp=-" ) ) 
+ if "%Sceltanumero%" equ "8" ( if "%getstarted%" equ "-" ( set "getstarted=" ) else ( set "getstarted=-" ) ) 
+ if "%Sceltanumero%" equ "9" ( if "%officehub%" equ "-" ( set "officehub=" ) else ( set "officehub=-" ) ) 
+ if "%Sceltanumero%" equ "10" ( if "%microsoftsolitair%" equ "-" ( set "microsoftsolitair=" ) else ( set "microsoftsolitair=-" ) ) 
+ if "%Sceltanumero%" equ "11" ( if "%microsoftstickynotes%" equ "-" ( set "microsoftstickynotes=" ) else ( set "microsoftstickynotes=-" ) ) 
+ if "%Sceltanumero%" equ "12" ( if "%microsoftpaint%" equ "-" ( set "microsoftpaint=" ) else ( set "microsoftpaint=-" ) ) 
+ if "%Sceltanumero%" equ "13" ( if "%microsoftpeople%" equ "-" ( set "microsoftpeople=" ) else ( set "microsoftpeople=-" ) ) 
+ if "%Sceltanumero%" equ "14" ( if "%catturaschermo%" equ "-" ( set "catturaschermo=" ) else ( set "catturaschermo=-" ) ) 
+ if "%Sceltanumero%" equ "15" ( if "%microsoftstore%" equ "-" ( set "microsoftstore=" ) else ( set "microsoftstore=-" ) ) 
+ if "%Sceltanumero%" equ "16" ( if "%todo%" equ "-" ( set "todo=" ) else ( set "todo=-" ) ) 
+ if "%Sceltanumero%" equ "17" ( if "%vclibs%" equ "-" ( set "vclibs=" ) else ( set "vclibs=-" ) ) 
+ if "%Sceltanumero%" equ "18" ( if "%windowsphoto%" equ "-" ( set "windowsphoto=" ) else ( set "windowsphoto=-" ) ) 
+ if "%Sceltanumero%" equ "19" ( if "%windowsallarms%" equ "-" ( set "windowsallarms=" ) else ( set "windowsallarms=-" ) ) 
+ if "%Sceltanumero%" equ "20" ( if "%windowscalculator%" equ "-" ( set "windowscalculator=" ) else ( set "windowscalculator=-" ) ) 
+ if "%Sceltanumero%" equ "21" ( if "%windowscamera%" equ "-" ( set "windowscamera=" ) else ( set "windowscamera=-" ) ) 
+ if "%Sceltanumero%" equ "22" ( if "%windowscomunication%" equ "-" ( set "windowscomunication=" ) else ( set "windowscomunication=-" ) ) 
+ if "%Sceltanumero%" equ "23" ( if "%feedbackhub%" equ "-" ( set "feedbackhub=" ) else ( set "feedbackhub=-" ) ) 
+ if "%Sceltanumero%" equ "24" ( if "%windowsmap%" equ "-" ( set "windowsmap=" ) else ( set "windowsmap=-" ) ) 
+ if "%Sceltanumero%" equ "25" ( if "%windowsnotepad%" equ "-" ( set "windowsnotepad=" ) else ( set "windowsnotepad=-" ) ) 
+ if "%Sceltanumero%" equ "26" ( if "%suondrecord%" equ "-" ( set "suondrecord=" ) else ( set "suondrecord=-" ) ) 
+ if "%Sceltanumero%" equ "27" ( if "%windowsstore%" equ "-" ( set "windowsstore=" ) else ( set "windowsstore=-" ) ) 
+ if "%Sceltanumero%" equ "28" ( if "%xbox%" equ "-" ( set "xbox=" ) else ( set "xbox=-" ) ) 
+ if "%Sceltanumero%" equ "29" ( if "%yourphone%" equ "-" ( set "yourphone=" ) else ( set "yourphone=-" ) ) 
+ if "%Sceltanumero%" equ "30" ( if "%zunemusic%" equ "-" ( set "zunemusic=" ) else ( set "zunemusic=-" ) ) 
+ if "%Sceltanumero%" equ "31" ( if "%zunevideo%" equ "-" ( set "zunevideo=" ) else ( set "zunevideo=-" ) ) 
+ if "%Sceltanumero%" equ "32" ( if "%quickassist%" equ "-" ( set "quickassist=" ) else ( set "quickassist=-" ) )  
+ if "%Sceltanumero%" equ "33" ( if "%webexperience%" equ "-" ( set "webexperience=" ) else ( set "webexperience=-" ) )
+ if "%Sceltanumero%" equ "34" ( if "%microsoftteam%" equ "-" ( set "microsoftteam=" ) else ( set "microsoftteam=-" ) )
+ if "%Sceltanumero%" equ "35" ( if "%onenote%" equ "-" ( set "onenote=" ) else ( set "onenote=-" ) )
+ if "%Sceltanumero%" equ "36" ( if "%wallet%" equ "-" ( set "wallet=" ) else ( set "wallet=-" ) )
+
+ if /i "%Sceltanumero%" equ "A" ( 
+    set "wordpad=-" 
+    set "clipchamp=-" 
+    set "bingnews=-" 
+    set "bingwheter=-" 
+    set "desktopappinstaller=-" 
+    set "gamingapp=-" 
+    set "gethelp=-" 
+    set "getstarted=-" 
+    set "officehub=-" 
+    set "microsoftsolitair=-" 
+    set "microsoftpaint=-" 
+    set "microsoftstickynotes=-" 
+    set "microsoftpeople=-" 
+    set "catturaschermo=-" 
+    set "microsoftstore=-" 
+    set "todo=-" 
+    set "vclibs=-" 
+    set "windowsphoto=-" 
+    set "windowsallarms=-" 
+    set "windowscalculator=-" 
+    set "windowscamera=-" 
+    set "windowscomunication=-" 
+    set "feedbackhub=-" 
+    set "windowsmap=-" 
+    set "windowsnotepad=-" 
+    set "suondrecord=-" 
+    set "windowsstore=-" 
+    set "xbox=-" 
+    set "yourphone=-" 
+    set "zunemusic=-" 
+    set "zunevideo=-" 
+    set "quickassist=-" 
+    set "webexperience=-"
+    set "microsoftteam=-"
+    set "onenote=-"
+    set "wallet=-"
+
+ ) 
+ if /i "%Sceltanumero%" equ "X" (  
+  goto :selezionacomponenti 
+ ) else ( 
+  goto :appsistema11
  ) 
 ::############################################################################################################################## 
 ::Estrazione iso
@@ -1099,6 +1245,12 @@ SETLOCAL ENABLEEXTENSIONS
  ) 
  if defined PackageName ( 
     dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ )
+    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.XboxApp"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
  ) 
  ) 
  If "%yourphone%" equ "-" ( 
@@ -1107,7 +1259,7 @@ SETLOCAL ENABLEEXTENSIONS
  ) 
  if defined PackageName ( 
     dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
- ) 
+ )
  ) 
  If "%zunemusic%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.ZuneMusic"') do ( 
@@ -1143,6 +1295,38 @@ SETLOCAL ENABLEEXTENSIONS
  )
  If "%microsoftteam%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: MicrosoftTeams"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+  If "%mixedrealty%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.MixedReality.Portal"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+   If "%onenote%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.Office.OneNote"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+   If "%dviewe%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.Microsoft3DViewer"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+   If "%wallet%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.Wallet"') do ( 
     set "PackageName=%%a" 
  ) 
  if defined PackageName ( 
@@ -1229,7 +1413,7 @@ SETLOCAL ENABLEEXTENSIONS
   dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Pro for Worksations"
  if "%errorlevel%"=="0" ( set "key=%w11proworkkey%" && goto :menuunattend11 ) else ( goto :educationn )
  :educationn
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Education N"XZ
+  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Education N"
  if "%errorlevel%"=="0" ( set "key=%w11proEducationnkey%" && goto :menuunattend11 ) else ( goto :education )
  :education
   dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Education"
