@@ -1619,8 +1619,34 @@ SETLOCAL ENABLEEXTENSIONS
  :tweaks 
  IF "%os%" equ "" ( echo Seleziona prima ^<Monta ISO^> && timeout 4 >NUL && goto :menuprincipale ) 
  IF "%os%" equ "11" ( call :tweaks11 ) else ( call :tweaks10 ) 
- :tweaks10 
- echo in arrivo con i prossimi aggiornamenti && timeout 4 >NUL && goto :menuprincipale 
+ :tweaks10
+ cls 
+ title WIMToolkit Tweaks 
+ echo                    TWEAKS 
+ echo ================================================== 
+ echo        [1] Disabilita Cortana 
+ echo        [2] Elimina icone superflue taskbar 
+ echo        [3] Abilita visualizzatore foto windows 
+ echo        [4] Disabilita spazio riservato agli update 
+ echo        [5] Rimuovi Inbox App associate 
+ echo        [6] Disabilita Windows Update 
+ echo        [7] Disabilita Windows Feature 
+ echo        [8] Altri Tweaks
+ echo. 
+ echo                 [X] Indietro                    
+ echo =================================================== 
+ choice /C:12345678X /N /M "Digita un numero: " 
+ if errorlevel 9 goto :menuprincipale 
+ if errorlevel 8 call :altritweaks 
+ if errorlevel 7 call :disabilitawindowsfeature 
+ if errorlevel 6 call :stopupdate 
+ if errorlevel 5 call :inboxapp 
+ if errorlevel 4 call :disabilitaspazioriservato 
+ if errorlevel 3 call :abilitaphotoviwer 
+ if errorlevel 2 call :iconetaskbar 
+ if errorlevel 1 call :disabcortana
+
+
  :tweaks11 
  cls 
  title WIMToolkit Tweaks 
@@ -2591,19 +2617,17 @@ goto :extra
  echo                  TWEAKS 2
  echo ===============================================
  echo          [1] Nascondi Icona Chat
- echo          [2] Taskbar a sinistra
  echo          [3] Disabilita Windows Defender
  echo          [4] Disabilita Firewall
  echo          [5] Disabilita SmartScreen
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
- choice /C:12345X /N /M "Digita un numero: " 
- if errorlevel 6 goto :tweaks
- if errorlevel 5 goto :disabilitasmartscreen
- if errorlevel 4 goto :disabfirewall
- if errorlevel 3 goto :disabilitadefender
- if errorlevel 2 goto :taskbarsinistra
+ choice /C:1234X /N /M "Digita un numero: " 
+ if errorlevel 5 goto :tweaks
+ if errorlevel 4 goto :disabilitasmartscreen
+ if errorlevel 3 goto :disabfirewall
+ if errorlevel 2 goto :disabilitadefender
  if errorlevel 1 call :nascondichaticon
 
 
