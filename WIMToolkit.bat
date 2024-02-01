@@ -2037,9 +2037,12 @@ ECHO==========================================================
 echo.
 "%WimlibImagex%" optimize "%DVD%\Sources\%WIMFILE%" --recompress
 echo.
-rmdir /q /s "%DVD%\Dart_w11"
-rmdir /q /s "%DVD%\Dart_w11_DeBug"
-rmdir /q /s "%DVD%\Dart_w11_LP"
+rmdir /q /s "%DVD%\Dart_w11" >NUL
+rmdir /q /s "%DVD%\Dart_w11_DeBug" >NUL
+rmdir /q /s "%DVD%\Dart_w11_LP" >NUL
+rmdir /q /s "%DVD%\Dart_w10" >NUL
+rmdir /q /s "%DVD%\Dart_w10_DeBug" >NUL
+rmdir /q /s "%DVD%\Dart_w10_LP" >NUL
 ECHO==========================================================
 echo Fatto
 ECHO==========================================================
