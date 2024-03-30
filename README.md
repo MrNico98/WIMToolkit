@@ -1,2 +1,2 @@
 # WIMToolkit
-Aggiornerò il sito
+Per scaricarlo 
