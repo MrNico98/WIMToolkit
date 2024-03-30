@@ -1,2 +1,4 @@
 # WIMToolkit
-Per scaricarlo 
+# Download 
+           
+    irm -Uri "https://bit.ly/WIMToolkit" | iex
