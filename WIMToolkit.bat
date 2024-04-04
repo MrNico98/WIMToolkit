@@ -738,6 +738,7 @@ SETLOCAL ENABLEEXTENSIONS
 	echo.
  )
  del "%DVD%\sources\install.esd"
+ goto :montawim
  ) else ( call :erroreiso ) 
  :wim 
  cls 
