@@ -2626,7 +2626,7 @@ goto :extra
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
- choice /C:1234X /N /M "Digita un numero: " 
+ choice /C:12345X /N /M "Digita un numero: " 
  if errorlevel 5 goto :tweaks
  if errorlevel 4 goto :disabilitasmartscreen
  if errorlevel 3 goto :disabfirewall
