@@ -386,43 +386,6 @@ $ErrorActionPreference           = "SilentlyContinue"
     }
     write-host("Disabled OneDrive")
 
-    write-host("Removing bloatware, wait...")
-    $BloatwareList = @(
-        "Microsoft.BingNews"
-        "Microsoft.BingWeather"
-        "Microsoft.GetHelp"
-        "Microsoft.Getstarted"
-        "Microsoft.MicrosoftOfficeHub"
-        "Microsoft.MicrosoftSolitaireCollection"
-        "Microsoft.PowerAutomateDesktop"
-        "Microsoft.SecHealthUI"
-        "Microsoft.People"
-        "Microsoft.Todos"
-        "Microsoft.WindowsAlarms"
-        "microsoft.windowscommunicationsapps"
-        "Microsoft.WindowsFeedbackHub"
-        "Microsoft.WindowsMaps"
-        "Microsoft.WindowsSoundRecorder"
-        "Microsoft.YourPhone"
-        "Microsoft.ZuneMusic"
-        "Microsoft.ZuneVideo"
-        "MicrosoftTeams"
-        "ClipChamp.ClipChamp"
-    )
-    foreach($Bloat in $BloatwareList){
-        if((Get-AppxPackage -Name $Bloat).NonRemovable -eq $false)
-        {
-            write-host("Trying to remove $Bloat")
-            Try {
-                Get-AppxPackage -Name $Bloat | Remove-AppxPackage -ErrorAction Stop | Out-Null
-                Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online -ErrorAction Stop
-            }
-            Catch {
-                write-host("Rimozione Fallita $Bloat, exception : $($_)")
-            }
-            
-        }  
-    }
     write-host("Finito. Riavvio il PC tra 20 secondi, attendi.")
 
     shutdown /r /t 20
