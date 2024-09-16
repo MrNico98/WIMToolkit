@@ -34,6 +34,7 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Aggiunte\W10\VisualCRuntime" ( mkdir "%~dp0\Aggiunte\W10\VisualCRuntime" )
  IF NOT EXIST "Aggiunte\W11\VisualCRuntime" ( mkdir "%~dp0\Aggiunte\W11\VisualCRuntime" )
  IF NOT EXIST "Aggiunte\W11\Driver" ( mkdir "%~dp0\Aggiunte\W11\Driver" )
+ IF NOT EXIST "Aggiunte\W11\FileCAB" ( mkdir "%~dp0\Aggiunte\W11\FileCAB" )
  set "driver=Aggiunte\W11\Driver"
  set "aggiunte11=Aggiunte\W11"
  set "aggiunte10=Aggiunte\W10"
@@ -66,6 +67,7 @@ SETLOCAL ENABLEEXTENSIONS
  set "cab=Risorse\esd2cab_CLI.cmd"
  set "empty=1"
  set "HostUILanguage=it-IT"
+ set "FileCAB=Aggiunte\W11\FileCAB"
 ::############################################################################################################################## 
 ::EULA 
  cls 
@@ -133,13 +135,15 @@ SETLOCAL ENABLEEXTENSIONS
  cls 
  echo               Menu Componenti 
  echo =================================================== 
- echo        [1] Seleziona i componenti 
- echo        [2] Avvia rimozione selezionati "-" 
+ echo        [1] Seleziona i componenti
+ echo        [2] Rimuovi Lingue Windows
+ echo        [3] Avvia rimozione selezionati "-" 
  echo. 
  echo                [X] Indietro 
  echo =================================================== 
- choice /C:12X /N /M "Digita un numero: " 
- if errorlevel 3 goto :menuprincipale 
+ choice /C:123X /N /M "Digita un numero: " 
+ if errorlevel 4 goto :menuprincipale
+ if errorlevel 3 goto :lingue  
  if errorlevel 2 call :rimozioneselzionati 
  if errorlevel 1 goto :selezionacomponenti 
 ::############################################################################################################################## 
@@ -322,7 +326,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo                              MENU System 
  echo =============================================================================== 
  echo                       %directx% [1] DirectX (causa problemi) 
- echo                       %language% [2] Elimina le altre lingue 
+ echo                       %accessibilita% [2] Accessibilita
  echo                       %hello% [3] Windows Hello 
  echo                       %kernella57% [4] Kernel LA57 
  echo                       %mediaplayer% [5] Windows Media Player 
@@ -348,7 +352,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo =============================================================================== 
  set /p "Sceltanumero=Digita un numero, poi premi invio: " 
  if "%Sceltanumero%" equ "1" ( if "%directx%" equ "-" ( set "directx=" ) else ( set "directx=-" ) ) 
- if "%Sceltanumero%" equ "2" ( if "%language%" equ "-" ( set "language=" ) else ( set "language=-" ) ) 
+ if "%Sceltanumero%" equ "2" ( if "%accessibilita%" equ "-" ( set "accessibilita=" ) else ( set "accessibilita=-" ) ) 
  if "%Sceltanumero%" equ "3" ( if "%hello%" equ "-" ( set "hello=" ) else ( set "hello=-" ) ) 
  if "%Sceltanumero%" equ "4" ( if "%kernella57%" equ "-" ( set "kernella57=" ) else ( set "kernella57=-" ) ) 
  if "%Sceltanumero%" equ "5" ( if "%mediaplayer%" equ "-" ( set "mediaplayer=" ) else ( set "mediaplayer=-" ) ) 
@@ -926,7 +930,7 @@ SETLOCAL ENABLEEXTENSIONS
  If "%directx%" equ "-" ( 
  powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-OneCore-DirectX-Database-FOD*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart}" 
  ) 
- If "%language%" equ "-" ( 
+ If "%accessibilita%" equ "-" ( 
  powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures-Handwriting*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart | Out-Null}" 
  powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures-OCR*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart | Out-Null}" 
  powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures-Speech*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart | Out-Null}" 
@@ -1418,6 +1422,43 @@ SETLOCAL ENABLEEXTENSIONS
  reg unload HKLM\zSOFTWARE 
  ) 
  goto :rimuovicomponenti 
+::#############################################################################################################################
+:lingue
+ for /f "tokens=2 delims==" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr "Default system UI language"') do set DefaultLang=%%A
+ for /f "tokens=2 delims==" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr "Installed language"') do (
+    set "Lang[!count!]=%%A"
+    set /a count+=1
+)
+
+rem Mostra il menu dinamico
+echo ==============================================================
+set i=0
+for /l %%i in (0,1,!count!) do (
+    set lang=!Lang[%%i]!
+    if defined lang (
+        echo [%%i] !lang!
+    )
+)
+echo.
+echo ==============================================================
+set /p "Sceltanumero=Digita il numero della lingua da rimuovere, poi premi invio o premi 'X' per tornare indietro: "
+
+if /i "%Sceltanumero%" equ "X" goto :rimuovicomponenti
+set "SceltaLingua=!Lang[%Sceltanumero%]!"
+if not "%SceltaLingua%"=="" (
+    echo Rimozione della lingua %SceltaLingua%...
+    call :RemoveLanguage %SceltaLingua%
+) else (
+    echo Selezione non valida. Uscita.
+)
+
+goto :eof
+
+:RemoveLanguage
+set language=%1
+echo Rimuovendo la lingua %language% dall'immagine...
+powershell -Command "Get-WindowsPackage -Path '%MountDir%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%MountDir% /Remove-Package /PackageName:$($_.PackageName) /NoRestart | Out-Null}"
+goto :lingue
 ::############################################################################################################################## 
 ::Unattend 
  :unattend 
@@ -1967,14 +2008,14 @@ if defined services[%serviceNumber%] (
  echo =================================================== 
  echo           [1] Visual C++
  echo           [2] Aggiungi Driver
- echo           [3] Aggiungi Lingua
+ echo           [3] Aggiungi file cab (lingua, aggioranmenti)
  echo
  echo.
  echo                   [X] Indietro
  echo ===================================================
  choice /C:123X /N /M "Digita un numero: " 
  if errorlevel 4 goto :menuprincipale
- if errorlevel 3 goto :lingua 
+ if errorlevel 3 goto :cab 
  if errorlevel 2 goto :adddriver
  if errorlevel 1 goto :visualc
 
@@ -1984,9 +2025,13 @@ if defined services[%serviceNumber%] (
  dism /Image:%winre% /Add-Driver /Driver:%driver% /ForceUnsigned /recurse
  goto :aggiungicomeponenti
 
- :lingua
- echo In arrivo
- timeout 5
+ :cab
+ if exist "%FileCAB%\*.esd" (
+    for %%f in ("%FileCAB%\*.esd") do (
+        %cab% "%%f"
+    )
+ )
+ dism /english /Image:%mount% /Add-Package /PackagePath:%FileCAB%\File.cab
  goto :aggiungicomeponenti
 
  :visualc
