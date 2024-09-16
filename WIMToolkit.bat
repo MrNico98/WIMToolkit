@@ -64,6 +64,8 @@ SETLOCAL ENABLEEXTENSIONS
  set "w11enterprisekey=XGVPP-NMH47-7TTHJ-W3FW7-8HV2C"
  set "w11enterprisenkey=WGGHN-J84D6-QYCPR-T7PJ7-X766F"
  set "cab=Risorse\esd2cab_CLI.cmd"
+ set "empty=1"
+ set "HostUILanguage=it-IT"
 ::############################################################################################################################## 
 ::EULA 
  cls 
@@ -1789,6 +1791,13 @@ if defined services[%serviceNumber%] (
  title WIMToolkit Menu Extra 
  if "%os%" equ "11" ( echo Devi smontare il l'install.wim per proseguire && timeout 5 >NUL && goto :menuprincipale )
  if "%os%" equ "10" ( echo Devi smontare il l'install.wim per proseguire && timeout 5 >NUL && goto :menuprincipale )
+ for /d %%D in ("%DVD%\*") do set "empty=0"
+ if %empty%==1 (
+    echo Devi prima estrarre la iso nella cartella <DVD> tramite il menu principale!
+    timeout 5 >NUL
+    goto :menuprincipale
+ )
+
  echo                   EXTRA 
  echo ==============================================
  echo     [1] Converti ESD in WIM
@@ -1798,13 +1807,11 @@ if defined services[%serviceNumber%] (
  echo     [5] Converti WIM in ESD
  echo     [6] Elimina WinRe
  echo     [7] DaRT
- echo     [8]
  echo. 
  echo               [X] Indietro                    
  echo ==============================================
- choice /C:12345678X /N /M "Digita un numero: " 
- if errorlevel 9 goto :menuprincipale
- if errorlevel 8 call :wallpaper 
+ choice /C:1234567X /N /M "Digita un numero: " 
+ if errorlevel 8 goto :menuprincipale
  if errorlevel 7 call :dart
  if errorlevel 6 call :delwinre
  if errorlevel 5 call :convertwim
@@ -1819,7 +1826,21 @@ if defined services[%serviceNumber%] (
 
 ::############################################################################################################################## 
 ::Crea ISO 
- :creaiso 
+ :creaiso
+ cls 
+ echo                  CREA ISO
+ echo ==============================================
+ echo     [1] Crea il .iso
+ echo     [2] Crea una USB avviabile
+ echo. 
+ echo               [X] Indietro                    
+ echo ==============================================
+ choice /C:12X /N /M "Digita un numero: " 
+ if errorlevel 3 goto :menuprincipale
+ if errorlevel 2 call :FormatUSB 
+ if errorlevel 1 call :creazioneiso
+
+:creazioneiso
  set "BIOSBoot=%DVD%\boot\etfsboot.com" 
  set "UEFIBoot=%DVD%\efi\microsoft\boot\efisys.bin" 
  set ISOLabel= 
@@ -1848,7 +1869,7 @@ if defined services[%serviceNumber%] (
  echo. 
  echo.=============================================================================== 
  echo. 
- pause>nul|set /p=Press any key to continue...
+ pause>nul|set /p=Premi un tasto per continuare...
  goto :menuprincipale 
 ::############################################################################################################################## 
 ::Bypass 
@@ -2900,3 +2921,319 @@ goto :extra
  call :RemoveFile %mount% 
  exit 
 ::############################################################################################################################## 
+::CreazioneUSB
+BurnUSB
+
+setlocal
+
+set ISOFileName=
+set USBDriveLetter=
+
+cls
+echo.===============================================================================
+echo.                MSMG ToolKit - Burn a ISO Image to USB Flash Drive
+echo.===============================================================================
+echo.
+
+:: Checking whether ISO folder is empty
+if not exist "%ISO%\*.iso" (
+	echo.ISO Image folder ^<ISO^> is empty...
+	echo.
+	echo.Please copy ISO Images to ^<ISO^> folder...
+	goto :Stop
+)
+
+echo.-------------------------------------------------------------------------------
+echo.####Starting Burning a ISO Image to USB Flash Drive############################
+echo.-------------------------------------------------------------------------------
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Getting ISO Image Options##################################################
+echo.-------------------------------------------------------------------------------
+echo.
+:: Getting ISO File Name
+set /p ISOFileName=Enter the ISO File Name : 
+
+:: Setting ISO File Name
+set "ISOFileName=%ISOFileName%.iso"
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Getting USB Flash Drive Options############################################
+echo.-------------------------------------------------------------------------------
+echo.
+:: Show Available USB Flash Drivers.
+echo.Listing Available USB Flash Drives...
+call :ListDisks
+
+:: Getting USB Flash Drive Letter
+set /p USBDriveLetter=Enter USB Flash Drive Letter : 
+
+:: Setting USB Flash Drive Letter
+set "USBDriveLetter=%USBDriveLetter%:"
+
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Burning ISO Image to USB Flash Drive#######################################
+echo.-------------------------------------------------------------------------------
+echo.
+echo.-------------------------------------------------------------------------------
+echo.Copying ISO Image file Contents to USB Flash Drive, Please Wait...
+echo.-------------------------------------------------------------------------------
+echo.
+echo.Source ISO        : %ISOFileName%
+echo.Target Drive      : %USBDriveLetter%
+echo.
+"%Zip%" x -y "%ISO%\%ISOFileName%" -o"%USBDriveLetter%"
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Finished Burning a ISO Image to USB Flash Drive############################
+echo.-------------------------------------------------------------------------------
+
+:Stop
+echo.
+echo.===============================================================================
+echo.
+pause>nul|set /p=Premi un tasto per continuare...
+
+set ISOFileName=
+set USBDriveLetter=
+
+endlocal
+
+:: Returning to Main Menu
+goto :MainMenu
+::-------------------------------------------------------------------------------------------
+
+::-------------------------------------------------------------------------------------------
+:: Function to Format a USB Flash Drive
+::-------------------------------------------------------------------------------------------
+:FormatUSB
+
+setlocal
+
+set USBDriveLetter=
+set USBDriveLabel=
+
+cls
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Inizio Formattazione USB########################################
+echo.-------------------------------------------------------------------------------
+echo.
+:: Show Available USB Flash Drivers.
+echo.Lista USB disponibili
+call :ListDisks
+
+:: Getting USB Flash Drive Letter
+set /p USBDriveLetter=Digitia la lettera della USB e premi invio : 
+echo.
+
+:: Setting USB Flash Drive Letter
+set "USBDriveLetter=%USBDriveLetter%:"
+
+:: Checking whether the Specified USB Flash Drive exist
+cd /d %USBDriveLetter% 2>nul
+if errorlevel 1 (
+	echo.Errore selezione USB, riprova
+	goto :Stop
+)
+
+:: Getting USB Flash Drive Volume Label.
+set /p USBDriveLabel=Inserisci l'etichetta del volume della USB : 
+echo.
+
+:: Getting USB Boot Type (UEFI/BIOS/ALL).
+choice /C:12 /N /M "Inserisci il tipo di avvio dell'unita flash USB [1=BIOS,2=BIOS/UEFI] : "
+if errorlevel 2 goto :BIOS_UEFI
+if errorlevel 1 goto :BIOS
+
+:: Formatting USB Flash Drive in NTFS Format for BIOS Booting Systems.
+:BIOS
+	echo.
+	choice /C:SN /N /M "Sei sicuro di voler formattare? [%USBDriveLetter%]? ['S'i/'N'o] : "
+	if errorlevel 2 (
+		echo.
+		echo.Formattazione della USB [%USBDriveLetter%] cancellata...
+		echo.
+		echo.-------------------------------------------------------------------------------
+		echo.####Fermo la formattazione della USB########################################
+		echo.-------------------------------------------------------------------------------
+		goto :Stop
+	)
+	if errorlevel 1 (
+		call :FormatDisk %USBDriveLetter%, NTFS, %USBDriveLabel%
+		echo.
+		echo.-------------------------------------------------------------------------------
+		echo.####USB Formattata correttamente########################################
+		echo.-------------------------------------------------------------------------------
+		goto :Stop
+	)
+
+:: Formatting USB Flash Drive in FAT32 Format for BIOS and or UEFI Booting Systems.
+:BIOS_UEFI
+	echo.
+	choice /C:SN /N /M "Sei sicuro di voler formattare? [%USBDriveLetter%]? ['S'i/'N'o] : "
+	if errorlevel 2 (
+		echo.
+		echo.Formattazione della USB [%USBDriveLetter%] cancellata...
+		echo.
+		echo.-------------------------------------------------------------------------------
+		echo.####Fermo la formattazione della USB########################################
+		echo.-------------------------------------------------------------------------------
+		goto :Stop
+	)
+	if errorlevel 1 (
+		call :FormatDisk %USBDriveLetter%, FAT32, %USBDriveLabel%
+		echo.
+		echo.-------------------------------------------------------------------------------
+		echo.####USB Formattata correttamente########################################
+		echo.-------------------------------------------------------------------------------
+		goto :Stop
+	)
+
+:Stop
+echo.
+echo Copio i file
+xcopy "%DVD%" 
+echo.===============================================================================
+echo.
+pause>nul|set /p=Premi un tasto per continuare...
+
+set USBDriveLetter=
+set USBDriveLabel=
+
+endlocal
+
+goto :BurnUSB
+::#####################################################################################################################################################################
+:ListDisks
+
+set "DiskTemp=C:"
+call :RemoveFile "%DiskTemp%\DiskList.txt"
+call :RemoveFile "%DiskTemp%\DiskList1.txt"
+
+echo.list volume>> "%DiskTemp%\DiskList.txt"
+diskpart /s "%DiskTemp%\DiskList.txt" >> "%DiskTemp%\DiskList1.txt"
+call :RemoveFile "%DiskTemp%\DiskList.txt"
+echo.>> "%DiskTemp%\DiskList.txt"
+
+echo.===============================================================================>> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "en-US" echo.  Volume #  Letter Label      file Sys Type         Size    Status     Info>> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "fr-FR" echo.  N# volume   Ltr  Nom          Fs     Type        Taille   Statut     Info>> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "zh-CN" echo.  卷 #      盘符   标签       文件系统  类型        大小    状态       信息>> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "it-IT" echo.  Volume #  Lettera Etichetta  file Sys Tipo         Dimensione Stato     Info>> "%DiskTemp%\DiskList.txt"
+echo.------------------------------------------------------------------------------->> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "en-US" findstr "Removable" "%DiskTemp%\DiskList1.txt" >> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "fr-FR" findstr "Amovible" "%DiskTemp%\DiskList1.txt" >> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "zh-CN" findstr "可移动" "%DiskTemp%\DiskList1.txt" >> "%DiskTemp%\DiskList.txt"
+if "%HostUILanguage%" equ "it-IT" findstr "Rimovibile" "%DiskTemp%\DiskList1.txt" >> "%DiskTemp%\DiskList.txt"
+echo.===============================================================================>> "%DiskTemp%\DiskList.txt"
+
+type "%DiskTemp%\DiskList.txt"
+call :RemoveFile "%DiskTemp%\DiskList.txt"
+call :RemoveFile "%DiskTemp%\DiskList1.txt"
+echo.
+
+goto :eof
+
+::#####################################################################################################################################################################
+:FormatDisk
+
+set "DiskTemp=C:"
+
+:: Writing DiskPart.txt Script File.
+call :RemoveFile "%DiskTemp%\DiskPart.txt"
+echo.select volume ^%~1>> "%DiskTemp%\DiskPart.txt"
+echo.clean>> "%DiskTemp%\DiskPart.txt"
+echo.create partition primary>> "%DiskTemp%\DiskPart.txt"
+echo.select partition ^1>> "%DiskTemp%\DiskPart.txt"
+echo.active>> "%DiskTemp%\DiskPart.txt"
+echo.format fs=%~2 quick label=%~3>> "%DiskTemp%\DiskPart.txt"
+echo.exit>> "%DiskTemp%\DiskPart.txt"
+echo.exit>> "%DiskTemp%\DiskPart.txt"
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Formatto USB Flash Drive###################################################
+echo.-------------------------------------------------------------------------------
+echo.
+:: Executing DiskPart.txt Script file With Diskpart.
+echo.Formatto la usb [%~1] in %~2 Format, Please wait...
+start /B /wait diskpart /s "%DiskTemp%\DiskPart.txt" >nul
+echo.
+echo.Formattazione USB [%~1] in %~2 Format, complete...
+call :RemoveFile "%DiskTemp%\DiskPart.txt"
+
+goto :eof
+::#####################################################################################################################################################################
+:BurnUSB
+
+setlocal
+
+set ISOFileName=
+set USBDriveLetter=
+echo.
+
+:: Checking whether ISO folder is empty
+if not exist "%ISO%\*.iso" (
+	echo.ISO Image folder ^<ISO^> is empty...
+	echo.
+	echo.Please copy ISO Images to ^<ISO^> folder...
+	goto :Stop
+)
+
+echo.-------------------------------------------------------------------------------
+echo.####Avvio della masterizzazione di un'immagine ISO su USB######################
+echo.-------------------------------------------------------------------------------
+echo.
+echo.
+:: Getting ISO File Name
+set /p ISOFileName=Enter the ISO File Name : 
+
+:: Setting ISO File Name
+set "ISOFileName=%ISOFileName%.iso"
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Ottengo informazioni USB###################################################
+echo.-------------------------------------------------------------------------------
+echo.
+:: Show Available USB Flash Drivers.
+echo.Lista delle USB disponibili...
+call :ListDisks
+
+:: Getting USB Flash Drive Letter
+set /p USBDriveLetter=Inserisci la lettera della USB : 
+
+:: Setting USB Flash Drive Letter
+set "USBDriveLetter=%USBDriveLetter%:"
+
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Masterizzazione di immagini ISO su USB#####################################
+echo.-------------------------------------------------------------------------------
+echo.
+echo.-------------------------------------------------------------------------------
+echo.Copia del contenuto del file immagine ISO sulla USB, attendere...
+echo.-------------------------------------------------------------------------------
+echo.
+echo.Source ISO        : %ISOFileName%
+echo.Target Drive      : %USBDriveLetter%
+echo.
+"%Zip%" x -y "%ISO%\%ISOFileName%" -o"%USBDriveLetter%"
+echo.
+echo.-------------------------------------------------------------------------------
+echo.####Masterizzazione di un'immagine ISO su USB completata#######################
+echo.-------------------------------------------------------------------------------
+
+:Stop
+echo.
+echo.===============================================================================
+echo.
+pause>nul|set /p=Premi un tasto per continuare...
+
+set ISOFileName=
+set USBDriveLetter=
+
+endlocal
+
+:: Returning to Main Menu
+goto :creaiso
