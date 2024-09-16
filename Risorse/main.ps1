@@ -128,17 +128,6 @@ $ErrorActionPreference           = "SilentlyContinue"
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo" -Name "Enabled" -Type DWord -Value 0
     write-host("Advertising ID has been disabled")
 
-    #Disable SmartScreen
-    if (!(Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer")){
-        New-Item -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Force | Out-Null
-    }
-    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer" -Name "SmartScreenEnabled" -Type String -Value "Off"
-    if (!(Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AppHost")){
-        New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AppHost" -Force | Out-Null
-    }
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\AppHost" -Name "EnableWebContentEvaluation" -Value 0
-    write-host("SmartScreen has been disabled")
-
     #Disable File History
     if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\FileHistory")){
         New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\FileHistory" -Force | Out-Null
@@ -201,6 +190,108 @@ $ErrorActionPreference           = "SilentlyContinue"
     Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name TaskbarAl -Value 0 -Force
 
     write-host("Disabling some services and scheduled tasks")
+
+$services = @(
+    "diagnosticshub.standardcollector.service"     # Microsoft (R) Diagnostics Hub Standard Collector Service
+    "DiagTrack"                                    # Diagnostics Tracking Service
+    "SCardSvr"
+    "ScDeviceEnum"
+    "DoSvc"
+    "DPS"
+    "diagsvc"
+    "WalletService"
+    "MixedRealityOpenXRSvc"
+    "dmwappushservice"                             # WAP Push Message Routing Service (see known issues)
+    "lfsvc"                                        # Geolocation Service
+    "MapsBroker"                                   # Downloaded Maps Manager
+    "NetTcpPortSharing"                            # Net.Tcp Port Sharing Service
+    "RemoteAccess"                                 # Routing and Remote Access
+    "RemoteRegistry"                               # Remote Registry
+    "SharedAccess"                                 # Internet Connection Sharing (ICS)
+    "TrkWks"                                       # Distributed Link Tracking Client
+    "WbioSrvc"                                     # Windows Biometric Service (required for Fingerprint reader / facial detection)
+    "WMPNetworkSvc"                                # Windows Media Player Network Sharing Service
+    "XblAuthManager"                               # Xbox Live Auth Manager
+    "XblGameSave"                                  # Xbox Live Game Save Service
+    "XboxNetApiSvc"                                # Xbox Live Networking Service
+    "XboxGipSvc"                                   #Disables Xbox Accessory Management Service
+    "WerSvc"                                       #disables windows error reporting
+    "Spooler"                                      #Disables your printer
+    "Fax"                                          #Disables fax
+    "fhsvc"                                        #Disables fax histroy
+    "gupdate"                                      #Disables google update
+    "gupdatem"                                     #Disable another google update
+    "stisvc"                                       #Disables Windows Image Acquisition (WIA)
+    "AJRouter"                                     #Disables (needed for AllJoyn Router Service)
+    "MSDTC"                                        # Disables Distributed Transaction Coordinator
+    "WpcMonSvc"                                    #Disables Parental Controls
+    "PhoneSvc"                                     #Disables Phone Service(Manages the telephony state on the device)
+    "PcaSvc"                                       #Disables Program Compatibility Assistant Service
+    "WPDBusEnum"                                   #Disables Portable Device Enumerator Service
+    "LicenseManager"                               #Disable LicenseManager(Windows store may not work properly)
+    "seclogon"                                     #Disables  Secondary Logon(disables other credentials only password will work)
+    "SysMain"                                      #Disables sysmain
+    "lmhosts"                                      #Disables TCP/IP NetBIOS Helper
+    "wisvc"                                        #Disables Windows Insider program(Windows Insider will not work)
+    "FontCache"                                    #Disables Windows font cache
+    "RetailDemo"                                   #Disables RetailDemo whic is often used when showing your device
+    "ALG"                                          #Disables Application Layer Gateway Service(Provides support for 3rd party protocol plug-ins for Internet Connection Sharing)
+    "SCardSvr"                                     #Disables Windows smart card, most home users don't need it, businesses may need it however
+    "SCPolicySvc"                                  #Allows the system to be configured to lock the user desktop upon smart card removal.
+    "ScDeviceEnum"                                 #Creates software device nodes for all smart card readers accessible to a given session. If this service is disabled, WinRT APIs will not be able to enumerate smart card readers.
+    "MessagingService_34048"                       # Service supporting text messaging and related functionality.
+    "wlidsvc"                                      #Enables user sign-in through Microsoft account identity services.  If you loged in using a microsft account, while setting up Windows your pc will likely break
+    "EntAppSvc"                                    #Disables enterprise application management. Home users likely don't need this.
+    "BthAvctpSvc"                                  #Disables AVCTP service (if you use  Bluetooth Audio Device or Wireless Headphones. then don't disable this)
+    "Browser"                                      #Disables computer browser
+    "BthAvctpSvc"                                  #AVCTP service (This is Audio Video Control Transport Protocol service.)
+    "BDESVC"                                       #Disables bitlocker
+    "iphlpsvc"                                     #Disables ipv6 but most websites don't use ipv6 they use ipv4     
+    "edgeupdate"                                   #Disables one of edge's update service
+    "MicrosoftEdgeElevationService"                #Disables one of edge's  service 
+    "edgeupdatem"                                  #Disbales another one of update service (disables edgeupdatem)                          
+    "SEMgrSvc"                                     #Disables Payments and NFC/SE Manager (Manages payments and Near Field Communication (NFC) based secure elements)
+    "PerfHost"                                     #Disables  remote users and 64-bit processes to query performance .
+    "BcastDVRUserService_48486de"                  #Disables GameDVR and Broadcast   is used for Game Recordings and Live Broadcasts
+    "CaptureService_48486de"                       #Disables ptional screen capture functionality for applications that call the Windows.Graphics.Capture API.  
+    "cbdhsvc_48486de"                              #Disables   cbdhsvc_48486de (clipboard service it disables)
+    "BluetoothUserService_48486de"                 #disbales BluetoothUserService_48486de (The Bluetooth user service supports proper functionality of Bluetooth features relevant to each user session.)
+    "DoSvc"                                        #Performs content delivery optimization tasks, mainly for windows updates.
+    "RtkBtManServ"                                 #Disables Realtek Bluetooth Device Manager Service
+    "QWAVE"                                        #Disables Quality Windows Audio Video Experience (audio and video might sound worse)
+    "SNMPTrap"                                     #Receives trap messages generated by local or remote Simple Network Management Protocol (SNMP) agents and forwards the messages to SNMP management programs running on this computer. If this service is stopped, SNMP-based programs on this computer will not receive SNMP trap messages. If this service is disabled, any services that explicitly depend on it will fail to start.
+    "SECOMNService"                                #Sound Research SECOMN Service
+    "AMD External Events Utility"                  # Placeholder
+    "cbdhsvc_34048"                                # Disables the windows clipboard
+    "autotimesvc"                                  # This service sets time based on NITZ messages from a Mobile Network
+    "TokenBroker"                                  # This service is used by Web Account Manager to provide single-sign-on to apps and services.
+    "RmSvc"                                        # Radio Management and Airplane Mode Service
+    "RtkAudioUniversalService"                     # Realtek Audio Universal Service
+    "SensorDataService"                            # Delivers data from a variety of sensors
+    "EventLog"                                    # This service manages events and event logs. 
+    "tzautoupdate"                                 # Automatically sets the system time zone.
+    "SynTPEnhService"                              # Synaptics TouchPad Enhancements Service
+    "RasMan"                                       # Manages dial-up and virtual private network (VPN) connections from your computer to the Internet or other remote networks. If this service is disabled, any services that explicitly depend on it will fail to start."
+    "BcastDVRUserService_34048"                    # This user service is used for Game Recordings and Live Broadcasts
+    "PenService_34048"                             # Digital pen service. All digital pens will fail to work
+    "tapisrv"                                      # Provides Telephony API (TAPI) support for programs that control telephony devices on the local computer and, through the LAN, on servers that are also running the service.
+    "HvHost"                                       #Manages and supports Hyper-V virtualization services
+    "vmickvpexchange"                               #Facilitates communication between the host and virtual machines
+    "vmicguestinterface"                            #Provides network communication for guest virtual machines
+    "vmicshutdown"                                  #Allows for proper shutdown coordination between host and virtual machines
+    "vmicheartbeat"                                 #Monitors the heartbeat status of virtual machines for health monitoring
+    "vmicvmsession"                                 #Manages sessions between the host and virtual machines
+    "vmicrdv"                                       #Handles Remote Desktop Virtualization
+    "vmictimesync"                                  #Ensures time synchronization between the host and virtual machines.
+    Out-File -FilePath  ".\log.txt" -Append
+)
+
+foreach ($service in $services) {
+    Get-Service -Name $service | Stop-Service -Force | Out-File -FilePath  ".\log.txt" -Append
+    Get-Service -Name $service | Set-Service -StartupType Disabled | Out-File -FilePath  ".\log.txt" -Append
+    Write-Output "Trying to disable $service" | Out-File -FilePath  ".\log.txt" -Append
+    Write-Output "Trying to Stop $service" | Out-File -FilePath  ".\log.txt" -Append
+}
 
     $Services = @(
         "MixedRealityOpenXRSvc" # Mixed Reality

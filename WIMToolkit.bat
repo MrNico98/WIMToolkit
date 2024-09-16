@@ -62,11 +62,12 @@ SETLOCAL ENABLEEXTENSIONS
  set "w11proeducationkey=8PTT6-RNW4C-6V7J2-C2D3X-MHBPB"
  set "w11proEducationnkey=84NGF-MHBT6-FXBX8-QWJK7-DRR8H"
  set "w11enterprisekey=XGVPP-NMH47-7TTHJ-W3FW7-8HV2C"
- set "w11enterprisenkey=WGGHN-J84D6-QYCPR-T7PJ7-X766F" 
+ set "w11enterprisenkey=WGGHN-J84D6-QYCPR-T7PJ7-X766F"
+ set "cab=Risorse\esd2cab_CLI.cmd"
 ::############################################################################################################################## 
 ::EULA 
  cls 
- title WIMToolkit v.0.5
+ title WIMToolkit v.0.6
  echo. ======================================================EULA============================================================ 
  echo. Il WIMToolkit e' fondamentalmente uno strumento per eseguire la manutenzione, personalizzare, aggiungere o rimuovere 
  echo. funzionalita' e componenti, abilitare o disabilitare funzionalita' del sistema operativo Windows. 
@@ -96,15 +97,15 @@ SETLOCAL ENABLEEXTENSIONS
 ::MenuPrincipale 
  :menuprincipale
  cls
- title WIMToolkit v.0.5
+ title WIMToolkit v.0.6
  echo                        Menu
  echo =================================================== 
  echo                   [1] Estrai ISO 
  echo                   [2] Monta WIM 
  echo                   [3] Rimuovi Componenti 
- echo                   [4] Unattend 
+ echo                   [4] Unattend e Servizi
  echo                   [5] Tweaks 
- echo                   [6] Aggiungi componenti 
+ echo                   [6] Aggiungi Componenti
  echo                   [7] Smonta WIM 
  echo                   [8] Extra WIM 
  echo                   [9] Crea ISO
@@ -266,7 +267,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo        %kerneldegging% [4] Kernel Debugging 
  echo        %wifisense% [5] Wifi Sense 
  echo        %unifiedtelemetryclient% [6] Unified Telemetry Client 
- echo        %picturepassword% [7] Picture Password 
+ echo        %picturepassword% [7] Picture Password
  echo.          
  echo                       [A] Seleziona tutto 
  echo                       [X] Indietro 
@@ -337,6 +338,8 @@ SETLOCAL ENABLEEXTENSIONS
  echo                       %localizzazione% [17] Localizzazione 
  echo                       %tailoredexperiences% [18] Tailored Experience
  echo                       %onedrive% [19] OneDrive
+ echo                       %heifi% [20] Estensione immagini HEIFI
+ echo                       %StepsRecorder% [21] Registrazione passaggi Windows
  echo.          
  echo                           [A] Seleziona tutto 
  echo                           [X] Indietro 
@@ -361,6 +364,8 @@ SETLOCAL ENABLEEXTENSIONS
  if "%Sceltanumero%" equ "17" ( if "%localizzazione%" equ "-" ( set "localizzazione=" ) else ( set "localizzazione=-" ) ) 
  if "%Sceltanumero%" equ "18" ( if "%tailoredexperiences%" equ "-" ( set "tailoredexperiences=" ) else ( set "tailoredexperiences=-" ) )
  if "%Sceltanumero%" equ "19" ( if "%onedrive%" equ "-" ( set "onedrive=" ) else ( set "onedrive=-" ) ) 
+ if "%Sceltanumero%" equ "20" ( if "%heifi%" equ "-" ( set "heifi=" ) else ( set "heifi=-" ) )
+ if "%Sceltanumero%" equ "21" ( if "%StepsRecorder%" equ "-" ( set "StepsRecorder=" ) else ( set "StepsRecorder=-" ) )
 
  if /i "%Sceltanumero%" equ "A" ( 
     set "directx=-" 
@@ -382,6 +387,8 @@ SETLOCAL ENABLEEXTENSIONS
     set "localizzazione=-" 
     set "tailoredexperiences=-"
     set "onedrive=-"
+    set "heifi=-"
+    set "StepsRecorder=-"
  ) 
  if /i "%Sceltanumero%" equ "X" (  
   goto :selezionacomponenti 
@@ -610,7 +617,7 @@ SETLOCAL ENABLEEXTENSIONS
  if "%Sceltanumero%" equ "34" ( if "%microsoftteam%" equ "-" ( set "microsoftteam=" ) else ( set "microsoftteam=-" ) )
  if "%Sceltanumero%" equ "35" ( if "%onenote%" equ "-" ( set "onenote=" ) else ( set "onenote=-" ) )
  if "%Sceltanumero%" equ "36" ( if "%wallet%" equ "-" ( set "wallet=" ) else ( set "wallet=-" ) )
- if "%Sceltanumero%" equ "36" ( if "%outlook%" equ "-" ( set "outlook=" ) else ( set "outlook=-" ) )
+ if "%Sceltanumero%" equ "37" ( if "%outlook%" equ "-" ( set "outlook=" ) else ( set "outlook=-" ) )
 
  if /i "%Sceltanumero%" equ "A" ( 
     set "wordpad=-" 
@@ -686,18 +693,19 @@ SETLOCAL ENABLEEXTENSIONS
  echo.------------------------------------------------------------------------------- 
  echo.####Inizio Estrazione####################### 
  echo.------------------------------------------------------------------------------- 
- echo. 
- call :RemoveFolder "%DVD%" 
+ echo.
+ call :RemoveFolder "%DVD%"
  echo.Sto estraendo l'iso in ^<DVD^> attendi... 
- echo. 
- "%Zip%" x -y "%ISO%\%ISOFileName%" -o"%DVD%" >NUL 
- echo. 
- set /a n=0 
- if exist "%DVD%\sources\boot.wim" set /a n+=1 
- if exist "%DVD%\sources\install.wim" set /a n+=1 
- if exist "%DVD%\sources\install.esd" set /a n+=1 
- if "%n%" equ "2" (echo.Estrazione completata...) else echo.Estrazione fallita.... 
- echo. 
+ echo.
+ echo.Attendi...
+ "%Zip%" x -y "%ISO%\%ISOFileName%" -o"%DVD%" >nul
+ echo.
+ set /a n=0
+ if exist "%DVD%\sources\boot.wim" set /a n+=1
+ if exist "%DVD%\sources\install.wim" set /a n+=1
+ if exist "%DVD%\sources\install.esd" set /a n+=1
+ if "%n%" equ "2" (echo.Estrazione Completata...) else echo.Estrazione Fallita...
+ echo.
  echo.------------------------------------------------------------------------------- 
  echo.####Fine Estrazione############## 
  echo.------------------------------------------------------------------------------- 
@@ -720,9 +728,9 @@ SETLOCAL ENABLEEXTENSIONS
  IF "%os%" equ "10" echo WIM gia' montato! && timeout 4 >NUL && goto :menuprincipale 
  cls 
  rem check if wim or esd 
- IF EXIST "%DVD%\sources\install.wim" ( goto :wim ) else ( goto :esd ) 
+ IF EXIST "%DVD%\sources\install.wim" ( goto :wim ) else ( goto :esd )
+
  :esd
- IF EXIST "%DVD%\sources\install.esd" (
  cls 
  echo ============================= 
  echo Converto ESD in WIM 
@@ -739,7 +747,7 @@ SETLOCAL ENABLEEXTENSIONS
  )
  del "%DVD%\sources\install.esd"
  goto :montawim
- ) else ( call :erroreiso ) 
+
  :wim 
  cls 
  echo. 
@@ -793,7 +801,10 @@ SETLOCAL ENABLEEXTENSIONS
  echo Inizio Rimozione..... 
  If "%internetexplorer%" equ "-" ( 
    powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'InternetExplorer*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart}" 
-  ) 
+  )
+  If "%StepsRecorder%" equ "-" ( 
+   powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'StepsRecorder*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart}" 
+  )  
  If "%windowsservice%" equ "-" ( 
   Risorse\PowerRun.exe cmd.exe /c "del /Q /S %mount%\Windows\System32\WalletService.exe" 
   reg load HKLM\TempHive "%mount%\Windows\System32\config\SOFTWARE" 
@@ -847,7 +858,8 @@ SETLOCAL ENABLEEXTENSIONS
   reg add "HKLM\TempHive\SOFTWARE\Microsoft\Speech_OneCore\Settings\SpeechRecognition" /v SpeechRecognitionServiceAdaptiveLearningEnabled /t REG_DWORD /d 0 /f 
   reg unload HKLM\TempHive 
  ) 
- If "%wallpaper%" equ "-" ( 
+ If "%wallpaper%" equ "-" (
+ powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Wallpaper*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart}"   
  Risorse\PowerRun.exe cmd.exe /c "del /Q /S %mount%\Windows\Web\4K" 
  Risorse\PowerRun.exe cmd.exe /c "del /Q /S %mount%\Windows\Web\Screen" 
  Risorse\PowerRun.exe cmd.exe /c "del /Q /S %mount%\Windows\Web\touchkeyboard" 
@@ -1003,6 +1015,14 @@ SETLOCAL ENABLEEXTENSIONS
     dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
  ) 
  ) 
+  If "%heifi%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.HEIFImageExtension"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ ) 
  If "%officehub%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.MicrosoftOfficeHub"') do ( 
     set "PackageName=%%a" 
@@ -1068,7 +1088,7 @@ SETLOCAL ENABLEEXTENSIONS
  ) 
  ) 
  If "%catturaschermo%" equ "-" ( 
-   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.RawImageExtension"') do ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.RScreenSketch"') do ( 
     set "PackageName=%%a" 
  ) 
  if defined PackageName ( 
@@ -1435,32 +1455,118 @@ SETLOCAL ENABLEEXTENSIONS
  echo             AUTOUNATTEND 
  echo ====================================== 
  echo          [1] Autounattend
+ echo          [2] Servizi
  echo. 
  echo            [X] Indietro 
  echo ======================================
- choice /C:123X /N /M "Digita un numero: " 
- if errorlevel 4 goto :menuprincipale
- if errorlevel 3 goto :autounattenduefi
- if errorlevel 2 goto :autounattendmbr  
+ choice /C:12X /N /M "Digita un numero: " 
+ if errorlevel 3 goto :menuprincipale
+ if errorlevel 2 goto :servizi
  if errorlevel 1 goto :generaautounattend
+
+:servizi
+reg load HKLM\TempSystem C:\WIMToolkit\Mount\Windows\System32\config\SYSTEM >nul 2>&1
+if errorlevel 1 (
+    echo Errore nel caricamento del registry. Assicurati che l'immagine sia montata correttamente.
+    goto :end
+)
+
+echo Elenco dei servizi con stato (Automatico, Manuale, Disabilitato):
+echo ==============================================
+
+set count=0
+for /f "tokens=*" %%A in ('reg query HKLM\TempSystem\ControlSet001\Services') do (
+    set "serviceKey=%%A"
+    
+    :: Estrai solo il nome del servizio (parte finale del percorso)
+    for %%C in ("%%A") do (
+        set "serviceName=%%~nxC"
+    )
+    
+    :: Ottieni il valore "Start" del servizio
+    for /f "tokens=3" %%B in ('reg query "%%A" /v Start 2^>nul') do (
+        set start=%%B
+        
+        if "!start!"=="0x2" (
+            set status=Automatico
+        ) else if "!start!"=="0x3" (
+            set status=Manuale
+        ) else if "!start!"=="0x4" (
+            set status=Disabilitato
+        ) else (
+            set status=Altro
+        )
+
+        :: Mostra solo il nome del servizio con il suo stato
+        if defined status (
+            set /a count+=1
+            echo !count! - !serviceName! (!status!)
+            set "services[!count!]=!serviceName!"
+            set "serviceStatus[!count!]=!status!"
+            set "serviceKey[!count!]=%%A"
+        )
+    )
+)
+
+:: Se nessun servizio è stato trovato
+if !count!==0 (
+    echo Nessun servizio trovato.
+    goto :end
+)
+
+:: Chiedi all'utente di scegliere il numero del servizio
+echo.
+set /p serviceNumber=Scegli il numero del servizio da abilitare/disabilitare o premi X per tornare indietro: 
+
+:: Se l'utente sceglie X, torna al menu
+if /i "%serviceNumber%"=="X" (
+    reg unload HKLM\TempSystem
+    goto :menuunattend11
+)
+
+:: Verifica la scelta e disabilita/abilita il servizio
+if defined services[%serviceNumber%] (
+    set "selectedService=!services[%serviceNumber%]!"
+    set "selectedKey=!serviceKey[%serviceNumber%]!"
+
+    echo Hai scelto il servizio: !selectedService!
+
+    set "selectedStatus=!serviceStatus[%serviceNumber%]!"
+    if "!selectedStatus!"=="Disabilitato" (
+        set /p choice=Vuoi abilitare il servizio (A per automatico, M per manuale, N per annullare)? 
+        if /i !choice!==A (
+            reg add "!selectedKey!" /v Start /t REG_DWORD /d 2 /f
+            echo Servizio impostato su automatico.
+        ) else if /i !choice!==M (
+            reg add "!selectedKey!" /v Start /t REG_DWORD /d 3 /f
+            echo Servizio impostato su manuale.
+        ) else (
+            echo Operazione annullata.
+        )
+    ) else (
+        echo Il servizio e' !selectedStatus!. Vuoi disabilitarlo (S/N)?
+        set /p choice=
+        if /i !choice!==S (
+            reg add "!selectedKey!" /v Start /t REG_DWORD /d 4 /f
+            echo Servizio disabilitato.
+        ) else (
+            echo Operazione annullata.
+        )
+    )
+) else (
+    echo Scelta non valida!
+)
+
+ :end
+ :: Scarica l'hive del registro
+ reg unload HKLM\TempSystem
+ goto :menuunattend11
+
+
 
 :generaautounattend
  powershell -command "(Get-Content -path Risorse\autounattend.xml -Raw) -replace 'keyporduct', '%key%' | Set-Content -Path Risorse\autounattend_edited.xml"
- choice /C:SN /N /M "Vuoi avviare la riduzione processi ad iso installata? [S'i/'N'o]: " 
- if errorlevel 2 ( 
-    set "mainps1=no" 
-    set "ps1main="
- ) else ( 
-    set "mainps1=si"
-    set "ps1main=powerShell -ExecutionPolicy Bypass -File C:\Windows\start.ps1" 
- )
- if "%mainps1%" equ "si" (
-   powershell -command "(Get-Content -path Risorse\autounattend_edited.xml -Raw) -replace 'maips1', '%ps1main%' | Set-Content -Path Risorse\autounattend_e1dited.xml"
-   copy "Risorse\main.ps1" "%mount%\Windows"
-   copy "Risorse\start.ps1" "%mount%\Windows"
- ) else ( 
  powershell -command "(Get-Content -path Risorse\autounattend_edited.xml -Raw) -replace 'maips1', '%ps1main%' | Set-Content -Path Risorse\autounattend_e1dited.xml"
- )
  del "Risorse\autounattend_edited.xml"
  move "Risorse\autounattend_e1dited.xml" "%DVD%\autounattend.xml" 
  goto :menuunattend11
@@ -1692,11 +1798,13 @@ SETLOCAL ENABLEEXTENSIONS
  echo     [5] Converti WIM in ESD
  echo     [6] Elimina WinRe
  echo     [7] DaRT
+ echo     [8]
  echo. 
  echo               [X] Indietro                    
  echo ==============================================
- choice /C:1234567X /N /M "Digita un numero: " 
- if errorlevel 8 goto :menuprincipale
+ choice /C:12345678X /N /M "Digita un numero: " 
+ if errorlevel 9 goto :menuprincipale
+ if errorlevel 8 call :wallpaper 
  if errorlevel 7 call :dart
  if errorlevel 6 call :delwinre
  if errorlevel 5 call :convertwim
@@ -1838,12 +1946,14 @@ SETLOCAL ENABLEEXTENSIONS
  echo =================================================== 
  echo           [1] Visual C++
  echo           [2] Aggiungi Driver
- echo           
+ echo           [3] Aggiungi Lingua
+ echo
  echo.
  echo                   [X] Indietro
  echo ===================================================
- choice /C:12X /N /M "Digita un numero: " 
- if errorlevel 3 goto :menuprincipale 
+ choice /C:123X /N /M "Digita un numero: " 
+ if errorlevel 4 goto :menuprincipale
+ if errorlevel 3 goto :lingua 
  if errorlevel 2 goto :adddriver
  if errorlevel 1 goto :visualc
 
@@ -1853,7 +1963,14 @@ SETLOCAL ENABLEEXTENSIONS
  dism /Image:%winre% /Add-Driver /Driver:%driver% /ForceUnsigned /recurse
  goto :aggiungicomeponenti
 
+ :lingua
+ echo In arrivo
+ timeout 5
+ goto :aggiungicomeponenti
+
  :visualc
+ echo In arrivo
+ timeout 5
  goto :aggiungicomeponenti
 ::############################################################################################################################
 ::Dart
@@ -2442,6 +2559,9 @@ goto :extra
     set "mixedrealty=-"
     set "onenote=-"
     set "wallet=-"
+    set "outlook=-"
+    set "heifi=-"
+    set "StepsRecorder=-"
  ) else (
     set "internetexplorer=-" 
     set "windowsservice=-" 
