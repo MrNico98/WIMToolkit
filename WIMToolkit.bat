@@ -2967,91 +2967,6 @@ goto :extra
  exit 
 ::############################################################################################################################## 
 ::CreazioneUSB
-BurnUSB
-
-setlocal
-
-set ISOFileName=
-set USBDriveLetter=
-
-cls
-echo.===============================================================================
-echo.                MSMG ToolKit - Burn a ISO Image to USB Flash Drive
-echo.===============================================================================
-echo.
-
-:: Checking whether ISO folder is empty
-if not exist "%ISO%\*.iso" (
-	echo.ISO Image folder ^<ISO^> is empty...
-	echo.
-	echo.Please copy ISO Images to ^<ISO^> folder...
-	goto :Stop
-)
-
-echo.-------------------------------------------------------------------------------
-echo.####Starting Burning a ISO Image to USB Flash Drive############################
-echo.-------------------------------------------------------------------------------
-echo.
-echo.-------------------------------------------------------------------------------
-echo.####Getting ISO Image Options##################################################
-echo.-------------------------------------------------------------------------------
-echo.
-:: Getting ISO File Name
-set /p ISOFileName=Enter the ISO File Name : 
-
-:: Setting ISO File Name
-set "ISOFileName=%ISOFileName%.iso"
-echo.
-echo.-------------------------------------------------------------------------------
-echo.####Getting USB Flash Drive Options############################################
-echo.-------------------------------------------------------------------------------
-echo.
-:: Show Available USB Flash Drivers.
-echo.Listing Available USB Flash Drives...
-call :ListDisks
-
-:: Getting USB Flash Drive Letter
-set /p USBDriveLetter=Enter USB Flash Drive Letter : 
-
-:: Setting USB Flash Drive Letter
-set "USBDriveLetter=%USBDriveLetter%:"
-
-echo.
-echo.-------------------------------------------------------------------------------
-echo.####Burning ISO Image to USB Flash Drive#######################################
-echo.-------------------------------------------------------------------------------
-echo.
-echo.-------------------------------------------------------------------------------
-echo.Copying ISO Image file Contents to USB Flash Drive, Please Wait...
-echo.-------------------------------------------------------------------------------
-echo.
-echo.Source ISO        : %ISOFileName%
-echo.Target Drive      : %USBDriveLetter%
-echo.
-"%Zip%" x -y "%ISO%\%ISOFileName%" -o"%USBDriveLetter%"
-echo.
-echo.-------------------------------------------------------------------------------
-echo.####Finished Burning a ISO Image to USB Flash Drive############################
-echo.-------------------------------------------------------------------------------
-
-:Stop
-echo.
-echo.===============================================================================
-echo.
-pause>nul|set /p=Premi un tasto per continuare...
-
-set ISOFileName=
-set USBDriveLetter=
-
-endlocal
-
-:: Returning to Main Menu
-goto :MainMenu
-::-------------------------------------------------------------------------------------------
-
-::-------------------------------------------------------------------------------------------
-:: Function to Format a USB Flash Drive
-::-------------------------------------------------------------------------------------------
 :FormatUSB
 
 setlocal
@@ -3138,11 +3053,8 @@ if errorlevel 1 goto :BIOS
 
 :Stop
 echo.
-echo Copio i file
-xcopy "%DVD%" 
 echo.===============================================================================
 echo.
-pause>nul|set /p=Premi un tasto per continuare...
 
 set USBDriveLetter=
 set USBDriveLabel=
@@ -3218,11 +3130,10 @@ set ISOFileName=
 set USBDriveLetter=
 echo.
 
-:: Checking whether ISO folder is empty
 if not exist "%ISO%\*.iso" (
-	echo.ISO Image folder ^<ISO^> is empty...
+	echo.La cartella immagine ^<ISO^> sembra vuota...
 	echo.
-	echo.Please copy ISO Images to ^<ISO^> folder...
+	echo.Copia le immagini ISO nella cartella ^<ISO^>...
 	goto :Stop
 )
 
@@ -3279,6 +3190,4 @@ set ISOFileName=
 set USBDriveLetter=
 
 endlocal
-
-:: Returning to Main Menu
 goto :creaiso
