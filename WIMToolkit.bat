@@ -27,6 +27,7 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Mount" ( mkdir "%~dp0\Mount" ) 
  IF NOT EXIST "Boot" ( mkdir "%~dp0\Boot" ) 
  IF NOT EXIST "WinRE" ( mkdir "%~dp0\WinRe" ) 
+ IF NOT EXIST "Temp" ( mkdir "%~dp0\Temp" ) 
  IF NOT EXIST "Features" ( mkdir "%~dp0\Features" ) 
  IF NOT EXIST "WIMpersonali" ( mkdir "%~dp0\WIMpersonali" )
  IF NOT EXIST "Aggiunte\W11" ( mkdir "%~dp0\Aggiunte\W11" )
@@ -36,6 +37,7 @@ SETLOCAL ENABLEEXTENSIONS
  IF NOT EXIST "Aggiunte\W11\Driver" ( mkdir "%~dp0\Aggiunte\W11\Driver" )
  IF NOT EXIST "Aggiunte\W11\FileCAB" ( mkdir "%~dp0\Aggiunte\W11\FileCAB" )
  set "driver=Aggiunte\W11\Driver"
+ set "risorcacab=Risorse\ESD2CAB-CAB2ESD.zip"
  set "aggiunte11=Aggiunte\W11"
  set "aggiunte10=Aggiunte\W10"
  set "wimpersonali=WIMpersonali"
@@ -43,6 +45,7 @@ SETLOCAL ENABLEEXTENSIONS
  set "winre=WinRE" 
  set "mount=Mount" 
  set "DVD=DVD" 
+ set "wimtemp=Temp"
  set "ISO=ISO" 
  set "boot=Boot" 
  set "Aggiunte=Aggiunte" 
@@ -106,7 +109,7 @@ SETLOCAL ENABLEEXTENSIONS
  echo =================================================== 
  echo                   [1] Estrai ISO 
  echo                   [2] Monta WIM 
- echo                   [3] Rimuovi Componenti 
+ echo                   [3] Rimuovi\Modifica Componenti 
  echo                   [4] Unattend e Servizi
  echo                   [5] Tweaks 
  echo                   [6] Aggiungi Componenti
@@ -137,14 +140,16 @@ SETLOCAL ENABLEEXTENSIONS
  echo =================================================== 
  echo        [1] Seleziona i componenti
  echo        [2] Rimuovi Lingue Windows
- echo        [3] Avvia rimozione selezionati "-" 
+ echo        [3] Cambia lingua default Windows
+ echo        [4] Avvia rimozione selezionati "-" 
  echo. 
  echo                [X] Indietro 
  echo =================================================== 
- choice /C:123X /N /M "Digita un numero: " 
- if errorlevel 4 goto :menuprincipale
- if errorlevel 3 goto :lingue  
- if errorlevel 2 call :rimozioneselzionati 
+ choice /C:1234X /N /M "Digita un numero: " 
+ if errorlevel 5 goto :menuprincipale
+ if errorlevel 4 goto :rimozioneselzionati
+ if errorlevel 3 goto :cambialingua   
+ if errorlevel 2 call :lingue
  if errorlevel 1 goto :selezionacomponenti 
 ::############################################################################################################################## 
 ::SelezionaCompoenti 
@@ -770,7 +775,7 @@ SETLOCAL ENABLEEXTENSIONS
         ) 
     ) 
  ) 
- echo. 
+ echo.=============================================================================== 
  set /p indicemontato="Inserisci numero Indice oppure 'X' per tornare indietro: " 
  if /i "%indicemontato%" equ "X" goto :menuprincipale 
  echo.
@@ -1423,42 +1428,119 @@ SETLOCAL ENABLEEXTENSIONS
  ) 
  goto :rimuovicomponenti 
 ::#############################################################################################################################
-:lingue
- for /f "tokens=2 delims==" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr "Default system UI language"') do set DefaultLang=%%A
- for /f "tokens=2 delims==" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr "Installed language"') do (
-    set "Lang[!count!]=%%A"
-    set /a count+=1
-)
+:cambialingua
+ cls
+ title WIMToolkit Seleziona Lingua
+ set /a count=0
+ for /f "tokens=*" %%A in ('dism /english /Image:C:\WIMToolkit\Mount /Get-Intl ^| findstr /C:"Default system UI language"') do (
+    set DefaultLang=%%A
+ )
+ set count=0
+ set lang_list=
+ pause
+ for /f "tokens=1,* delims=:" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr /C:"Installed language(s):"') do (
+    set "lang_list=%%B"
+    for %%C in (!lang_list!) do (
+        set "Lang[!count!]=%%C"
+        set /a count+=1
+    )
+ )
 
-rem Mostra il menu dinamico
-echo ==============================================================
-set i=0
-for /l %%i in (0,1,!count!) do (
+
+ echo                    Seleziona lingua Windows
+ echo. ==============================================================
+ echo.
+ echo Lingua UI predefinita: !DefaultLang!
+ echo.
+ echo.
+ if !count! equ 0 (
+    echo Nessuna lingua trovata && timeout 4 >NUL && goto :menuprincipale
+ )
+
+ set i=0
+ for /l %%i in (0,1,!count!) do (
     set lang=!Lang[%%i]!
     if defined lang (
-        echo [%%i] !lang!
+    echo [%%i] !lang!
     )
-)
-echo.
-echo ==============================================================
-set /p "Sceltanumero=Digita il numero della lingua da rimuovere, poi premi invio o premi 'X' per tornare indietro: "
+ )
+ echo.
+ echo. ==============================================================
+ set /p "Sceltanumero=Digita il numero della lingua da rimuovere, poi premi invio o premi 'X' per tornare indietro: "
 
-if /i "%Sceltanumero%" equ "X" goto :rimuovicomponenti
-set "SceltaLingua=!Lang[%Sceltanumero%]!"
-if not "%SceltaLingua%"=="" (
-    echo Rimozione della lingua %SceltaLingua%...
-    call :RemoveLanguage %SceltaLingua%
-) else (
-    echo Selezione non valida. Uscita.
-)
+ if /i "!Sceltanumero!" equ "X" goto :rimuovicomponenti
+ set "SceltaLingua=!Lang[%Sceltanumero%]!"
+ if not "!SceltaLingua!"=="" (
+    call :cambialinguasistema !SceltaLingua!
+    goto :cambialingua
+ ) else (
+    echo Selezione non valida && timeout 4 >NUL && goto :cambialingua
+ )
 
-goto :eof
 
-:RemoveLanguage
-set language=%1
-echo Rimuovendo la lingua %language% dall'immagine...
-powershell -Command "Get-WindowsPackage -Path '%MountDir%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%MountDir% /Remove-Package /PackageName:$($_.PackageName) /NoRestart | Out-Null}"
-goto :lingue
+ :cambialinguasistema
+ set language=%1
+ dism /Image:%mount% /Set-UILang:%language%
+ dism /Image:%mount% /Set-UserLocale:%language%
+ dism /Image:%mount% /Set-InputLocale:%language%
+ dism /Image:%boot% /Set-UILang:%language%
+ dism /Image:%boot% /Set-UserLocale:%language%
+ dism /Image:%boot% /Set-InputLocale:%language%
+ goto :cambialingua
+::#############################################################################################################################
+:lingue
+ cls
+ title WIMToolkit Rimuovi Lingua 
+ set count=0
+ set lang_list=
+ for /f "tokens=1,* delims=:" %%A in ('dism /english /Image:%mount% /Get-Intl ^| findstr /C:"Installed language(s):"') do (
+    set "lang_list=%%B"
+    for %%C in (!lang_list!) do (
+        set "Lang[!count!]=%%C"
+        set /a count+=1
+    )
+ )
+
+ echo                    Rimuovi lingua Windows
+ echo. ==============================================================
+ echo.
+ if !count! equ 0 (
+    echo Nessuna lingua trovata && timeout 4 >NUL && goto :menuprincipale
+ )
+
+ set i=0
+ for /l %%i in (0,1,!count!) do (
+    set lang=!Lang[%%i]!
+    if defined lang (
+    echo [%%i] !lang!
+    )
+ )
+ echo.
+ echo. ==============================================================
+ set /p "Sceltanumero=Digita il numero della lingua da rimuovere, poi premi invio o premi 'X' per tornare indietro: "
+
+ if /i "!Sceltanumero!" equ "X" goto :rimuovicomponenti
+ set "SceltaLingua=!Lang[%Sceltanumero%]!"
+ if not "!SceltaLingua!"=="" (
+    call :RemoveLanguage !SceltaLingua!
+    goto :lingue
+ ) else (
+    echo Selezione non valida && timeout 4 >NUL && goto :lingue
+ )
+
+
+ :RemoveLanguage
+ set language=%1
+ powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /NoRestart }"
+ powershell -Command "Get-WindowsPackage -Path '%mount%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%mount% /Remove-Package /PackageName:$($_.PackageName) /ScratchDir:%wimtemp% /NoRestart }"
+ powershell -Command "$mount='%mount%'; $language='%language%'; $results=Get-WindowsPackage -Path $mount | Where-Object { $_.PackageName -like 'Microsoft-Windows-Client-LanguagePack*' -and $_.PackageName -like '*'+$language+'*' }; if ($results) { $results | ForEach-Object { dism /image:$mount /Remove-Package /PackageName:$($_.PackageName) /ScratchDir='%wimtemp%' /NoRestart } } else { Write-Host 'Nessun pacchetto trovato con i criteri specificati.' }"
+ powershell -Command "Get-WindowsPackage -Path '%boot%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%boot% /Remove-Package /PackageName:$($_.PackageName) /NoRestart }"
+ powershell -Command "Get-WindowsPackage -Path '%boot%' | Where-Object {$_.PackageName -like 'Microsoft-Windows-LanguageFeatures*-%language%*'} | ForEach-Object {dism /image:%boot% /Remove-Package /PackageName:$($_.PackageName) /ScratchDir:%wimtemp% /NoRestart }"
+ powershell -Command "$mount='%boot%'; $language='%language%'; $results=Get-WindowsPackage -Path $mount | Where-Object { $_.PackageName -like 'Microsoft-Windows-Client-LanguagePack*' -and $_.PackageName -like '*'+$language+'*' }; if ($results) { $results | ForEach-Object { dism /image:$mount /Remove-Package /PackageName:$($_.PackageName) /ScratchDir='%wimtemp%' /NoRestart } } else { Write-Host 'Nessun pacchetto trovato con i criteri specificati.' }"
+ PowerRun.exe cmd.exe /c "rmdir /s /q %wimtemp%"
+ IF NOT EXIST "Temp" ( mkdir "%~dp0\Temp" ) 
+ pause
+ goto :lingue
 ::############################################################################################################################## 
 ::Unattend 
  :unattend 
@@ -1639,6 +1721,7 @@ if defined services[%serviceNumber%] (
  if "%winremontato%" equ "si" (
  dism /unmount-image /mountdir:"%winre%" /discard
  )
+ call :RemoveFolder "%wimtemp%"
  set "os=" 
  goto :smontawim 
 
@@ -1698,7 +1781,7 @@ if defined services[%serviceNumber%] (
 		if exist "%winre%\Windows\inf\*.log" Risorse\PowerRun.exe cmd.exe /c "del /f /q %winre%\Windows\inf\*.log" 
 
 		if exist "%winre%\Windows\CbsTemp\*" (
-			for /f %%j in ('"dir /s /b /ad "%winre%\Windows\CbsTemp\*"" 2^>nul') do (call :RemoveFolder %%j)
+			for /f %%j in ('"dir /s /b /ad "%winre%\Windows\CbsTemp\*"" 2^>nul') do ( call :RemoveFolder %%j)
 			Risorse\PowerRun.exe cmd.exe /c "del /s /f /q %winre%\Windows\CbsTemp\*" 
 		)
 
@@ -1762,6 +1845,7 @@ if defined services[%serviceNumber%] (
  "%WimlibImagex%" optimize "%DVD%\sources\install.wim"
  "%WimlibImagex%" optimize "%DVD%\sources\boot.wim"
  )
+ call :RemoveFolder "%wimtemp%"
  set "os="
  goto :menuprincipale 
 ::############################################################################################################################## 
@@ -2009,7 +2093,6 @@ if defined services[%serviceNumber%] (
  echo           [1] Visual C++
  echo           [2] Aggiungi Driver
  echo           [3] Aggiungi file cab (lingua, aggioranmenti)
- echo
  echo.
  echo                   [X] Indietro
  echo ===================================================
@@ -2027,12 +2110,22 @@ if defined services[%serviceNumber%] (
 
  :cab
  if exist "%FileCAB%\*.esd" (
-    for %%f in ("%FileCAB%\*.esd") do (
-        %cab% "%%f"
-    )
+   "%Zip%" x -y "%risorcacab%" -o"%FileCAB%"
+   set "esd2cab=%FileCAB%\esd2cab_CLI.cmd"
+   call "%esd2cab%" goto :continuacab
+   ) else (
+      goto :continuacab
  )
- dism /english /Image:%mount% /Add-Package /PackagePath:%FileCAB%\File.cab
- goto :aggiungicomeponenti
+
+ :continuacab
+if exist "%FileCAB%\*.cab" (
+   for %%f in ("%FileCAB%\*.cab") do (
+      dism /english /Image:%mount% /Add-Package /PackagePath:"%%f"
+      dism /english /Image:%boot% /Add-Package /PackagePath:"%%f"
+   )
+ ) else (
+   echo Nessun file .cab trovato! && timeout 4 >NUL && goto :aggiungicomeponenti
+ )
 
  :visualc
  echo In arrivo
@@ -2527,9 +2620,9 @@ goto :extra
  goto :tweaks 
 
  :inboxapp
- dism /Get-DefaultAppAssociations /Image:%mount% | findstr /c:"file could not be" 
+ dism /english /Get-DefaultAppAssociations /Image:%mount% | findstr /c:"file could not be" 
  if errorlevel 1 ( 
- dism /Remove-DefaultAppAssociations /Image:%mount% 
+ dism /english /Remove-DefaultAppAssociations /Image:%mount% 
  ) 
  goto :tweaks
 ::##############################################################################################################################
@@ -2543,8 +2636,7 @@ goto :extra
  if "%bootmontato%" equ "si" (
  dism /Image:%boot% /Cleanup-Image /SPSuperseded /HideSP 
  dism /Image:%boot% /Cleanup-Image /StartComponentCleanup /ResetBase 
- dism /Image:%boot% /Cleanup-Image /CheckHealth 
- dism /Image:%boot% /Cleanup-Image /ScanHealth
+ dism /Image:%boot% /Cleanup-Image /CheckHealth
  )
  goto :puliziaimmagine
 ::############################################################################################################################## 
@@ -2754,7 +2846,8 @@ goto :extra
         ) 
     ) 
  ) 
- echo. 
+ echo.
+ echo.===============================================================================  
  set /p eliminaindex="Inserisci numero Indice oppure 'X' per tornare indietro: "
  if /i "%eliminaindex%" equ "X" goto :extra
  dism /Delete-Image /ImageFile:%DVD%\sources\install.wim /Index:%eliminaindex%
