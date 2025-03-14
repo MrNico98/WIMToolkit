@@ -10,7 +10,7 @@ Remove-Item -Path "C:\WIMToolkit" -Recurse -Force | out-null
 cd "C:\"
 
 # Download the script from GitHub
-Invoke-WebRequest -Uri "https://github.com/AMStore-server/WIMToolkit/archive/refs/heads/main.zip" -OutFile "WIMToolkit-main.zip"
+Invoke-WebRequest -Uri "https://github.com/MrNico98/WIMToolkit/archive/refs/heads/main.zip" -OutFile "WIMToolkit-main.zip"
 
 Expand-Archive -Path "WIMToolkit-main.zip" -DestinationPath "." -Force
 
