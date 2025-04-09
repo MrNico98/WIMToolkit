@@ -74,7 +74,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::EULA 
  cls 
- title WIMToolkit v.0.6
+ title WIMToolkit v.0.6.1
  echo. ======================================================EULA============================================================ 
  echo. Il WIMToolkit e' fondamentalmente uno strumento per eseguire la manutenzione, personalizzare, aggiungere o rimuovere 
  echo. funzionalita' e componenti, abilitare o disabilitare funzionalita' del sistema operativo Windows. 
@@ -1589,15 +1589,15 @@ SETLOCAL ENABLEEXTENSIONS
  if errorlevel 2 goto :servizi
  if errorlevel 1 goto :generaautounattend
 
-:servizi
-reg load HKLM\TempSystem C:\WIMToolkit\Mount\Windows\System32\config\SYSTEM >nul 2>&1
-if errorlevel 1 (
+ :servizi
+ reg load HKLM\TempSystem C:\WIMToolkit\Mount\Windows\System32\config\SYSTEM >nul 2>&1
+ if errorlevel 1 (
     echo Errore nel caricamento del registry. Assicurati che l'immagine sia montata correttamente.
     goto :end
-)
+ )
 
 echo Elenco dei servizi con stato (Automatico, Manuale, Disabilitato):
-echo ==============================================
+echo =======================================================================
 
 set count=0
 for /f "tokens=*" %%A in ('reg query HKLM\TempSystem\ControlSet001\Services') do (
@@ -1683,15 +1683,25 @@ if defined services[%serviceNumber%] (
 )
 
  :end
- :: Scarica l'hive del registro
  reg unload HKLM\TempSystem
+
+
  goto :menuunattend11
-
-
-
-:generaautounattend
- powershell -command "(Get-Content -path Risorse\autounattend.xml -Raw) -replace 'keyporduct', '%key%' | Set-Content -Path Risorse\autounattend_edited.xml"
+ choice /C:SN /N /M "Vuoi avviare la riduzione processi ad iso installata? [S'i/'N'o]: " 
+ if errorlevel 2 ( 
+    set "mainps1=no" 
+    set "ps1main="
+ ) else ( 
+    set "mainps1=si"
+    set "ps1main=powerShell -ExecutionPolicy Bypass -File C:\Windows\start.ps1" 
+ )
+ if "%mainps1%" equ "si" (
+   powershell -command "(Get-Content -path Risorse\autounattend.xml -Raw) -replace 'maips1', '%ps1main%' | Set-Content -Path Risorse\autounattend_e1dited.xml"
+   copy "Risorse\main.ps1" "%mount%\Windows"
+   copy "Risorse\start.ps1" "%mount%\Windows"
+ ) else ( 
  powershell -command "(Get-Content -path Risorse\autounattend_edited.xml -Raw) -replace 'maips1', '%ps1main%' | Set-Content -Path Risorse\autounattend_e1dited.xml"
+ )
  del "Risorse\autounattend_edited.xml"
  move "Risorse\autounattend_e1dited.xml" "%DVD%\autounattend.xml" 
  goto :menuunattend11
@@ -2903,15 +2913,49 @@ goto :extra
  echo          [3] Disabilita Windows Defender
  echo          [4] Disabilita Firewall
  echo          [5] Disabilita SmartScreen
+ ehco          [6] Preattiva ISO (Con MAS)
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
- choice /C:12345X /N /M "Digita un numero: " 
- if errorlevel 5 goto :tweaks
+ choice /C:123456X /N /M "Digita un numero: " 
+ if errorlevel 6 goto :tweaks
+ if errorlevel 5 goto :preattivaiso
  if errorlevel 4 goto :disabilitasmartscreen
  if errorlevel 3 goto :disabfirewall
  if errorlevel 2 goto :disabilitadefender
  if errorlevel 1 call :nascondichaticon
+
+
+ :preattivaiso
+ set "MAS_CMD=%TEMP%\MAS_AIO.cmd"
+
+
+ echo Download in corso di rework MAS_AIO.cmd...
+ powershell -Command "Invoke-WebRequest -Uri 'https://github.com/MrNico98/WIMToolkit/releases/download/ChangeMASscript/MAS_AIO.cmd' -OutFile '%MAS_CMD%'"
+
+
+ if exist "%MAS_CMD%" (
+    echo Esecuzione di rework MAS_AIO.cmd...
+    start /wait "" "%MAS_CMD%"
+ ) else (
+    echo Errore: rework MAS_AIO.cmd non trovato.
+    goto :EOF
+ )
+
+ echo rework MAS_AIO.cmd terminato.
+
+ set "OEM_FOLDER=%USERPROFILE%\Desktop\$OEM$"
+ set "DEST_FOLDER=%DVD%\sources"
+
+ if exist "!OEM_FOLDER!" (
+    echo Copia della cartella $OEM$ in %DVD%\sources...
+    xcopy "!OEM_FOLDER!" "!DEST_FOLDER!\$OEM$" /E /I /Y
+    echo Copia completata.
+ ) else (
+    echo Errore: la cartella $OEM$ non è stata trovata sul desktop.
+ )
+
+ goto :EOF
 
 
  :disabilitasmartscreen
