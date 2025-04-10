@@ -2910,14 +2910,14 @@ goto :extra
  echo                  TWEAKS 2
  echo ===============================================
  echo          [1] Nascondi Icona Chat
- echo          [3] Disabilita Windows Defender
- echo          [4] Disabilita Firewall
- echo          [5] Disabilita SmartScreen
- echo          [6] Preattiva ISO (Con MAS)
+ echo          [2] Disabilita Windows Defender
+ echo          [3] Disabilita Firewall
+ echo          [4] Disabilita SmartScreen
+ echo          [5] Preattiva ISO (Con MAS)
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
- choice /C:123456X /N /M "Digita un numero: " 
+ choice /C:12345X /N /M "Digita un numero: " 
  if errorlevel 6 goto :tweaks
  if errorlevel 5 goto :preattivaiso
  if errorlevel 4 goto :disabilitasmartscreen
