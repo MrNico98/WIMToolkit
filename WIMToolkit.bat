@@ -57,16 +57,6 @@ SETLOCAL ENABLEEXTENSIONS
  set LANG=it_IT 
  echo. > %features%\DisabilitaFeatures.txt 
  echo. > %features%\AbilitaFeatures.txt
- set "w11homekey=YTMG3-N6DKC-DKB77-7M9GH-8HVX7"
- set "w11homenkey=4CPRK-NM3K3-X6XXQ-RXX86-WXCHW"
- set "w11prokey=VK7JG-NPHTM-C97JM-9MPGT-3V66T"
- set "w11pronkey=2B87N-8KFHP-DKV6R-Y2C8J-PKCKT"
- set "w11proworkkey=DXG7C-N36C4-C4HTG-X4T3X-2YV77"
- set "w11proworknkey=WYPNQ-8C467-V2W6J-TX4WX-WT2RQ"
- set "w11proeducationkey=8PTT6-RNW4C-6V7J2-C2D3X-MHBPB"
- set "w11proEducationnkey=84NGF-MHBT6-FXBX8-QWJK7-DRR8H"
- set "w11enterprisekey=XGVPP-NMH47-7TTHJ-W3FW7-8HV2C"
- set "w11enterprisenkey=WGGHN-J84D6-QYCPR-T7PJ7-X766F"
  set "cab=Risorse\esd2cab_CLI.cmd"
  set "empty=1"
  set "HostUILanguage=it-IT"
@@ -74,7 +64,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::############################################################################################################################## 
 ::EULA 
  cls 
- title WIMToolkit v.0.6.1
+ title WIMToolkit v.0.7
  echo. ======================================================EULA============================================================ 
  echo. Il WIMToolkit e' fondamentalmente uno strumento per eseguire la manutenzione, personalizzare, aggiungere o rimuovere 
  echo. funzionalita' e componenti, abilitare o disabilitare funzionalita' del sistema operativo Windows. 
@@ -104,7 +94,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::MenuPrincipale 
  :menuprincipale
  cls
- title WIMToolkit v.0.6
+ title WIMToolkit v.0.7
  echo                        Menu
  echo =================================================== 
  echo                   [1] Estrai ISO 
@@ -429,25 +419,25 @@ SETLOCAL ENABLEEXTENSIONS
  echo                     %microsoftpaint% [12] Paint 
  echo                     %microsoftpeople% [13] Microsoft People 
  echo                     %catturaschermo% [14] Cattura Schermo 
- echo                     %microsoftstore% [15] Microsoft Store Acquisti in app -
+ echo                     %microsoftstore% [15] Microsoft Store Acquisti in app 
  echo                     %todo% [16] Microsoft To Do 
  echo                     %vclibs% [17] VC Libs (causa problemi) 
- echo                     %windowsphoto% [18] Windows Photo -
- echo                     %windowsallarms% [19] Sveglie e Allarmi -
- echo                     %windowscalculator% [20] Calcolatrice -
- echo                     %windowscamera% [21] Windows Camera -
- echo                     %windowscomunication% [22] Windows Comunication -
+ echo                     %windowsphoto% [18] Windows Photo 
+ echo                     %windowsallarms% [19] Sveglie e Allarmi 
+ echo                     %windowscalculator% [20] Calcolatrice 
+ echo                     %windowscamera% [21] Windows Camera 
+ echo                     %windowscomunication% [22] Windows Comunication
  echo                     %feedbackhub% [23] Feedback HUB 
- echo                     %windowsmap% [24] Mappe -
+ echo                     %windowsmap% [24] Mappe 
  echo                     %windowsnotepad% [25] Blocco Note 
- echo                     %suondrecord% [26] Registratore -
+ echo                     %suondrecord% [26] Registratore 
  echo                     %windowsstore% [27] Microsoft Store 
- echo                     %xbox% [28] Xbox -
- echo                     %yourphone% [29] Connetti il tuo telefono  -
- echo                     %zunemusic% [30] Zune Music -
- echo                     %zunevideo% [31] Zune video -
+ echo                     %xbox% [28] Xbox 
+ echo                     %yourphone% [29] Connetti il tuo telefono 
+ echo                     %zunemusic% [30] Zune Music 
+ echo                     %zunevideo% [31] Zune video 
  echo                     %quickassist% [32] Quick QuickAssist 
- echo                     %webexperience% [33] Web Experience -
+ echo                     %webexperience% [33] Web Experience
  echo                     %microsoftteam% [34] Microsoft Team
  echo                     %mixedrealty% [35] Microsoft MixedReality Portal
  echo                     %onenote% [36] OneNote
@@ -1296,6 +1286,14 @@ SETLOCAL ENABLEEXTENSIONS
     dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
  )
  ) 
+  If "%yourphone%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: MicrosoftWindows.CrossDevice"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ )
+ ) 
  If "%zunemusic%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: Microsoft.ZuneMusic"') do ( 
     set "PackageName=%%a" 
@@ -1330,6 +1328,14 @@ SETLOCAL ENABLEEXTENSIONS
  )
  If "%microsoftteam%" equ "-" ( 
    for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: MicrosoftTeams"') do ( 
+    set "PackageName=%%a" 
+ ) 
+ if defined PackageName ( 
+    dism /Image:"%mount%" /Remove-ProvisionedAppxPackage /PackageName:"!PackageName!" 
+ ) 
+ )
+  If "%microsoftteam%" equ "-" ( 
+   for /f "tokens=2 delims=: " %%a in ('dism /Image:%mount% /Get-ProvisionedAppxPackages ^| find /I "PackageName: MSTeams"') do ( 
     set "PackageName=%%a" 
  ) 
  if defined PackageName ( 
@@ -1425,7 +1431,8 @@ SETLOCAL ENABLEEXTENSIONS
  reg load HKLM\zSOFTWARE "%mount%\Windows\System32\config\SOFTWARE" 
  reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v "DisableTailoredExperiencesWithDiagnosticData" /t REG_DWORD /d 1 /f 
  reg unload HKLM\zSOFTWARE 
- ) 
+ )
+ dism /Image:%mount% /Optimize-ProvisionedAppxPackages
  goto :rimuovicomponenti 
 ::#############################################################################################################################
 :cambialingua
@@ -1483,9 +1490,13 @@ SETLOCAL ENABLEEXTENSIONS
  dism /Image:%mount% /Set-UILang:%language%
  dism /Image:%mount% /Set-UserLocale:%language%
  dism /Image:%mount% /Set-InputLocale:%language%
+ dism /image:%mount% /Set-SysUILang:%language%
+ dism /image:%mount% /Set-SysLocale:%language%
  dism /Image:%boot% /Set-UILang:%language%
  dism /Image:%boot% /Set-UserLocale:%language%
  dism /Image:%boot% /Set-InputLocale:%language%
+ dism /image:%boot% /Set-SysUILang:%language%
+ dism /image:%boot% /Set-SysLocale:%language%
  goto :cambialingua
 ::#############################################################################################################################
 :lingue
@@ -1552,29 +1563,6 @@ SETLOCAL ENABLEEXTENSIONS
  echo in arrivo con i prossimi aggiornamenti && timeout 4 >NUL && goto :menuprincipale
 
 :unattend11
- dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Home N"
- if "%errorlevel%"=="0" ( set "key=%w11homenkey%" && goto :menuunattend11 ) else ( goto :homen )
- :homen
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Home"
- if "%errorlevel%"=="0" ( set "key=%w11homekey%" && goto :menuunattend11 ) else ( goto :pron )
- :pron
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Pro N"
- if "%errorlevel%"=="0" ( set "key=%w11pronkey%" && goto :menuunattend11 ) else ( goto :pro )
- :pro
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Pro"
- if "%errorlevel%"=="0" ( set "key=%w11prokey%" && goto :menuunattend11 ) else ( goto :proworkn )
- :proworkn
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Pro N for Worksations"
- if "%errorlevel%"=="0" ( set "key=%w11proworknkey%" && goto :menuunattend11 ) else ( goto :prowork )
- :prowork
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Pro for Worksations"
- if "%errorlevel%"=="0" ( set "key=%w11proworkkey%" && goto :menuunattend11 ) else ( goto :educationn )
- :educationn
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Education N"
- if "%errorlevel%"=="0" ( set "key=%w11proEducationnkey%" && goto :menuunattend11 ) else ( goto :education )
- :education
-  dism /english /Get-ImageInfo /ImageFile:"%DVD%\sources\install.wim" /Index:%indicemontato% | find "Education"
- if "%errorlevel%"=="0" ( set "key=%w11proeducationkey%" && goto :menuunattend11 ) else ( echo Versione non identificata && timeout 4 >NUL && goto :menuprincipale )
  :menuunattend11
  cls
  echo             AUTOUNATTEND 
@@ -2910,14 +2898,14 @@ goto :extra
  echo                  TWEAKS 2
  echo ===============================================
  echo          [1] Nascondi Icona Chat
- echo          [3] Disabilita Windows Defender
- echo          [4] Disabilita Firewall
- echo          [5] Disabilita SmartScreen
- ehco          [6] Preattiva ISO (Con MAS)
+ echo          [2] Disabilita Windows Defender
+ echo          [3] Disabilita Firewall
+ echo          [4] Disabilita SmartScreen
+ echo          [5] Preattiva ISO (Con MAS)
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
- choice /C:123456X /N /M "Digita un numero: " 
+ choice /C:12345X /N /M "Digita un numero: " 
  if errorlevel 6 goto :tweaks
  if errorlevel 5 goto :preattivaiso
  if errorlevel 4 goto :disabilitasmartscreen
