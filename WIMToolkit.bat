@@ -2913,7 +2913,7 @@ goto :extra
  echo          [3] Disabilita Windows Defender
  echo          [4] Disabilita Firewall
  echo          [5] Disabilita SmartScreen
- ehco          [6] Preattiva ISO (Con MAS)
+ echo          [6] Preattiva ISO (Con MAS)
  echo. 
  echo                [X] Indietro                    
  echo ===============================================
