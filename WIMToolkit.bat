@@ -104,7 +104,7 @@ SETLOCAL ENABLEEXTENSIONS
 ::MenuPrincipale 
  :menuprincipale
  cls
- title WIMToolkit v.0.6
+ title WIMToolkit v.0.6.1
  echo                        Menu
  echo =================================================== 
  echo                   [1] Estrai ISO 
